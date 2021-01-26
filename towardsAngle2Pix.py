@@ -416,7 +416,7 @@ def Draw_Goldberg_Polyhedron(n,fact=0,return_df=True, modif=False):
 Draw_Goldberg_Polyhedron(5,return_df=False, modif=True)
 
 
-# In[15]:
+# In[13]:
 
 
 def plot_icoVertices():
@@ -434,20 +434,20 @@ def plot_icoVertices():
     plt.show()
 
 
-# In[16]:
+# In[14]:
 
 
 plot_icoVertices()
 
 
-# In[20]:
+# In[15]:
 
 
 # Import seaborn
 import seaborn as sns
 
 
-# In[26]:
+# In[16]:
 
 
 def icoTriangsConfig(modif=False):
@@ -492,21 +492,21 @@ def icoTriangsConfig(modif=False):
     plt.show()
 
 
-# In[22]:
+# In[17]:
 
 
 #Version de base
 #icoTriangsConfig()
 
 
-# In[25]:
+# In[18]:
 
 
 #mofdified versipn
 icoTriangsConfig(modif=True)
 
 
-# In[27]:
+# In[19]:
 
 
 def rot(phi, a,b,c):
@@ -531,7 +531,7 @@ def rot(phi, a,b,c):
              [(1-cphi)*a*c - b*sphi, (1-cphi)*b*c + a*sphi, cphi + c*c*(1-cphi)]])
 
 
-# In[28]:
+# In[20]:
 
 
 def getFace0TofaceIMtx():
@@ -607,13 +607,13 @@ def getFace0TofaceIMtx():
     return icoFaceMtx
 
 
-# In[29]:
+# In[21]:
 
 
 getFace0TofaceIMtx()[1]
 
 
-# In[30]:
+# In[22]:
 
 
 def getFaceIToface0Mtx():
@@ -699,7 +699,7 @@ def getFaceIToface0Mtx():
 
 
 
-# In[31]:
+# In[23]:
 
 
 """
@@ -721,14 +721,14 @@ for i in range(nfaces):
     print(f"face {i}: " + ("Ok" if np.allclose(verticesI[i].T, icoPoints[icoTriangs[i]]) else "Nok"))
 
 
-# In[32]:
+# In[24]:
 
 
 mtx02I = getFace0TofaceIMtx()
 mtxI20 = getFaceIToface0Mtx()
 
 
-# In[33]:
+# In[25]:
 
 
 """
@@ -739,7 +739,7 @@ for k in range(20):
     print(f"verif {k}:" + str(np.allclose(np.matmul(mtx02I[k],mtxI20[k]),np.identity(3))))
 
 
-# In[34]:
+# In[26]:
 
 
 def buildFace0(n=5):
@@ -828,7 +828,7 @@ def buildFace0(n=5):
 #                                                facecolors = colors[k], edgecolors='k', linewidths=1, alpha=0.9)
 
 
-# In[38]:
+# In[27]:
 
 
 def plotFaceI(k=0, ax=None):
@@ -897,13 +897,13 @@ def plotFaceI(k=0, ax=None):
         plt.show()
 
 
-# In[36]:
+# In[28]:
 
 
 #faces0, centers0, indexes0, types0 = buildFace0()
 
 
-# In[40]:
+# In[29]:
 
 
 fig = plt.figure()
@@ -922,7 +922,7 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[499]:
+# In[30]:
 
 
 def pt3D2FaceId(pt,icoTriangCenters, zTh1, zTh2, full=True):
@@ -935,13 +935,13 @@ def pt3D2FaceId(pt,icoTriangCenters, zTh1, zTh2, full=True):
 
 # # angle2Face vectorized based on relative distance wrt face centers
 
-# In[724]:
+# In[ ]:
 
 
 
 
 
-# In[41]:
+# In[31]:
 
 
 def getIcoTriangCenters():
@@ -961,13 +961,13 @@ def getIcoTriangCenters():
     return icoTriangCenters / norm[:,np.newaxis]
 
 
-# In[490]:
+# In[ ]:
 
 
 
 
 
-# In[42]:
+# In[32]:
 
 
 def pt3DtoSpherical(xyz):
@@ -985,7 +985,7 @@ def pt3DtoSpherical(xyz):
 
 
 
-# In[43]:
+# In[33]:
 
 
 # theta, phi angles of the 20 center of faces
@@ -993,7 +993,7 @@ icoTriangCenters = getIcoTriangCenters()
 angleicoTriangCenters= pt3DtoSpherical(icoTriangCenters)
 
 
-# In[44]:
+# In[34]:
 
 
 # theta, phi angles the 12 vertices
@@ -1002,31 +1002,31 @@ icoVertices = icoPoints
 angleicoVertices = pt3DtoSpherical(icoVertices)
 
 
-# In[45]:
+# In[35]:
 
 
 icoVertices
 
 
-# In[46]:
+# In[36]:
 
 
 angleicoVertices
 
 
-# In[47]:
+# In[37]:
 
 
 icoTriangCenters.shape
 
 
-# In[48]:
+# In[38]:
 
 
 angleicoTriangCenters.shape
 
 
-# In[75]:
+# In[39]:
 
 
 def angle2FaceId_fullVectorized(thetaPhi, icoTriangCenters):
@@ -1048,7 +1048,7 @@ def angle2FaceId_fullVectorized(thetaPhi, icoTriangCenters):
     return np.argmax(np.einsum('jk,kl->jl',icoTriangCenters,pt),axis=0)
 
 
-# In[76]:
+# In[40]:
 
 
 """
@@ -1062,14 +1062,14 @@ assert np.allclose(angle2FaceId_fullVectorized(angleicoTriangCenters[:N,:], icoT
                    truth), "Bug: The icosahedres faces must be on their faces!"
 
 
-# In[77]:
+# In[41]:
 
 
 """
 Verif2 : angle2FaceId_fullVectorized 
 draw random points on the sphere and plot location and face number
 """
-Npts = 100  # ATTENTION Nptsx Npts points....
+Npts = 10  # ATTENTION Nptsx Npts points....
 theta,phi = np.mgrid[0:pi:Npts*1j, 0:2*pi:Npts*1j]
 
 
@@ -1109,9 +1109,12 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[1116]:
+# In[43]:
 
 
+Npts = 100  # ATTENTION Nptsx Npts points....
+theta,phi = np.mgrid[0:pi:Npts*1j, 0:2*pi:Npts*1j]
+someOnSpherePts = np.array([theta.reshape(-1,),phi.reshape(-1,)]).T
 print("Nbre de pts: ",someOnSpherePts.shape[0])
 
 
@@ -1123,65 +1126,65 @@ get_ipython().run_cell_magic('timeit', '', '"""\nTiming angle2FaceId_fullVectori
 
 # # Vers le angle2pix
 
-# # angle2Pix for a Point on Face 0
+# # angle2Pix for a Point on a Face
 
-# In[1118]:
+# In[54]:
 
 
 getIcosaedreVertices()
 
 
-# In[1119]:
+# In[55]:
 
 
 icoTriangs = getIcoTriangs(modif=True)
 
 
-# In[1122]:
+# In[56]:
 
 
 icoTriangs[0]
 
 
-# In[1236]:
+# In[57]:
 
 
 #triplet of vertices of Face 0
 vertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
 
-# In[1237]:
+# In[58]:
 
 
 vertices0
 
 
-# In[1238]:
+# In[59]:
 
 
 #triplet of vertices of Face 1
 vertices1 = getIcosaedreVertices()[icoTriangs[1]]
 
 
-# In[1239]:
+# In[60]:
 
 
 vertices1
 
 
-# In[1126]:
+# In[61]:
 
 
-angle2FaceId_fullVectorized(angleicoTriangCenters, icoTriangCenters.T)
+angle2FaceId_fullVectorized(angleicoTriangCenters, icoTriangCenters)
 
 
-# In[1127]:
+# In[62]:
 
 
 angleicoTriangCenters
 
 
-# In[1188]:
+# In[94]:
 
 
 # 1 point dans la face 1
@@ -1192,13 +1195,13 @@ pt1 = a * vertices1[0] + b * vertices1[1] + (1-a-b) * vertices1[2]
 pt1 = pt1[np.newaxis,:]
 
 
-# In[1189]:
+# In[64]:
 
 
 pt1.shape
 
 
-# In[1186]:
+# In[65]:
 
 
 #matrice de Face I a Face 0
@@ -1206,94 +1209,14 @@ mtxI20 = getFaceIToface0Mtx()
 mtx120 = mtxI20[1]
 
 
-# In[1187]:
-
-
-mtx120.shape
-
-
-# In[1242]:
+# In[82]:
 
 
 #rotate to get the corresponding point on face0
 pt0 = np.matmul(mtx120,pt1.T).T
 
 
-# In[1243]:
-
-
-pt0.shape
-
-
-# In[1244]:
-
-
-pt0
-
-
-# In[1246]:
-
-
-vec0 = vertices0[0][np.newaxis,:]-pt0
-vec1 = vertices0[1][np.newaxis,:]-pt0
-vec2 = vertices0[2][np.newaxis,:]-pt0
-
-
-# In[1247]:
-
-
-vec1.shape
-
-
-# In[1248]:
-
-
-vec0,vec1,vec2
-
-
-# In[1249]:
-
-
-vertices0[0].shape
-
-
-# In[1250]:
-
-
-#tmp0 = np.cross(vertices0[0]-vertices0[1],vertices0[0]-vertices0[2])
-#aire0 = np.sqrt((tmp0*tmp0).sum(axis=0))
-
-
-# In[1251]:
-
-
-aire0
-
-
-# In[1252]:
-
-
-# 2 fois l'aire d'un des 20 triangles equilateraux 
-aire0 = sqrt(3)/2/sin(2*pi/5)**2
-
-
-# In[1256]:
-
-
-#retreive barycentric coordinate
-a0 = np.cross(vec1,vec2)
-a0 = np.sqrt((a0*a0).sum(axis=1))/aire0
-a1 = np.cross(vec2,vec0)
-a1 = np.sqrt((a1*a1).sum(axis=1))/aire0
-
-
-# In[1257]:
-
-
-a0,a1
-
-
-# In[1245]:
+# In[80]:
 
 
 fig = plt.figure()
@@ -1322,6 +1245,118 @@ ax.set_xlim3d([-1.1,1.1])
 ax.set_ylim3d([-1.1,1.1])
 ax.set_zlim3d([-1.1,1.1])
 plt.show()
+
+
+# In[81]:
+
+
+def getBarycentricCoord(pt,face):
+    """
+        pt (x,y,z) 
+        face : index
+        pt should be already ON the face
+    """
+    icoTriangs = getIcoTriangs(modif=True)
+    #triplet of vertices of Face
+    vertices = getIcosaedreVertices()[icoTriangs[face]]
+    #
+    vec0 = vertices[0][np.newaxis,:]-pt
+    vec1 = vertices[1][np.newaxis,:]-pt
+    vec2 = vertices[2][np.newaxis,:]-pt
+    # 2 fois l'aire d'un des 20 triangles equilateraux 
+    aire0 = sqrt(3)/2/sin(2*pi/5)**2
+    #retreive barycentric coordinate
+    a0 = np.cross(vec1,vec2)
+    a0 = np.sqrt((a0*a0).sum(axis=1))/aire0
+    a1 = np.cross(vec2,vec0)
+    a1 = np.sqrt((a1*a1).sum(axis=1))/aire0
+    return a0,a1
+
+
+# In[83]:
+
+
+getBarycentricCoord(pt0,0)
+
+
+# In[84]:
+
+
+getBarycentricCoord(pt1,1)
+
+
+# # find projection of a point to a give icosahedre face
+
+# In[98]:
+
+
+#this point is on the face 1 of icosahdre
+a=0.1
+b=0.7
+pt1 = a * vertices1[0] + b * vertices1[1] + (1-a-b) * vertices1[2]
+pt1 = pt1[np.newaxis,:]
+
+
+# In[134]:
+
+
+pt1
+
+
+# In[99]:
+
+
+#put it on the sphere
+pt1sphere = pt1/np.sqrt(np.sum(pt1*pt1))
+
+
+# In[100]:
+
+
+np.sum(pt1sphere*pt1sphere)
+
+
+# In[185]:
+
+
+def getBarycentricCoordExtension(pt,face):
+    """
+        pt (x,y,z) 
+        face : index
+        pt is not tied to be on the face, typically it is on the sphere
+    """
+    icoTriangs = getIcoTriangs(modif=True)
+    #triplet of vertices of Face
+    vertices = getIcosaedreVertices()[icoTriangs[face]]
+    #
+    u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
+    v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
+    w = pt - vertices[0][np.newaxis,:]
+    
+    print("u:",u)
+    print("v:",u)
+    print("pt:",pt)
+
+    smtx = np.vstack((u,v,pt)).T
+    print(smtx)
+    pjxymtx=np.array([[1,0,0],[0,1,0],[0,0,0]])
+    mtx1 = np.dot(smtx,pjxymtx)
+    smtxinv = np.linalg.inv(smtx)
+    mtx2 = np.dot(mtx1,smtxinv)
+    print(np.dot(mtx2,w.T))
+    return 
+
+
+# In[186]:
+
+
+getBarycentricCoordExtension(pt1sphere,1)
+
+
+# In[179]:
+
+
+pt1
 
 
 # In[ ]:
