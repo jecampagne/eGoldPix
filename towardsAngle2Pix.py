@@ -1279,6 +1279,16 @@ def getBarycentricCoord(pt,face):
 
 
 def testBaryCoordExt(a=0.1,b=0.7):
+    """
+    Test of getBarycentricCoordExtension method
+    input: (a,b) barycentric coordinates of a pt on each icosahedron triangle
+    process:
+       from (a,b) find the pt on the trinagle surface
+       project this point on to the sphere
+       then call getBarycentricCoordExtension which perform the inverse 
+         - retreive the pt on the triangle surface
+         - retreive the barycentric coordinates
+    """
     nFaces = 20
     assert a>=0 and a<=1 and b>=0 and b<=1 and a+b <=1, "a in [0,1], b in [0,1] and a+b in [0,1]"
     icoTriangs = getIcoTriangs(modif=True)
@@ -1304,6 +1314,54 @@ testBaryCoordExt()
 
 
 # # Find hexagone index once the barycentric coordinates are found 
+
+# In[302]:
+
+
+#
+#    x,y = -1/2,0
+#    scale = 1/(n*sqrt(3)) 
+#hexagcenter = np.array([x+i*1/n+j*1/(2*n), y+j*sqrt(3)/(2*n)])
+# bottom left corner
+xlc,ylc = -1/2,0
+norder = 5
+# (a,b) bary of pt
+a=0.5
+b=0.5
+# (x,y) of the pt
+xp = 0.5*(1+a)-b
+yp = a*sqrt(3)/2
+#
+####jhexa = np.floor((2*n)/sqrt(3)*(yp-ylc))
+####ihexa = np.floor(n*((xp-xlc)-(yp-yc)/sqrt(3)))
+jhexa = np.floor(norder*a).astype(np.int64) 
+ihexa = np.floor(norder*(1-b)).astype(np.int64) 
+
+
+# In[303]:
+
+
+ihexa,jhexa
+
+
+# In[310]:
+
+
+#tuiles de la face 0
+faces0, centers0, indexes0, types0 = buildFace0(n=norder)
+
+
+# In[311]:
+
+
+indexes0
+
+
+# In[309]:
+
+
+
+
 
 # In[ ]:
 
