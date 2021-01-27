@@ -1273,91 +1273,37 @@ def getBarycentricCoord(pt,face):
     return a0,a1
 
 
-# In[83]:
+# # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
+
+# In[284]:
 
 
-getBarycentricCoord(pt0,0)
-
-
-# In[84]:
-
-
-getBarycentricCoord(pt1,1)
-
-
-# # find projection of a point to a give icosahedre face
-
-# In[98]:
-
-
-#this point is on the face 1 of icosahdre
-a=0.1
-b=0.7
-pt1 = a * vertices1[0] + b * vertices1[1] + (1-a-b) * vertices1[2]
-pt1 = pt1[np.newaxis,:]
-
-
-# In[134]:
-
-
-pt1
-
-
-# In[99]:
-
-
-#put it on the sphere
-pt1sphere = pt1/np.sqrt(np.sum(pt1*pt1))
-
-
-# In[100]:
-
-
-np.sum(pt1sphere*pt1sphere)
-
-
-# In[185]:
-
-
-def getBarycentricCoordExtension(pt,face):
-    """
-        pt (x,y,z) 
-        face : index
-        pt is not tied to be on the face, typically it is on the sphere
-    """
+def testBaryCoordExt(a=0.1,b=0.7):
+    nFaces = 20
+    assert a>=0 and a<=1 and b>=0 and b<=1 and a+b <=1, "a in [0,1], b in [0,1] and a+b in [0,1]"
     icoTriangs = getIcoTriangs(modif=True)
-    #triplet of vertices of Face
-    vertices = getIcosaedreVertices()[icoTriangs[face]]
-    #
-    u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
-    v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
-    w = pt - vertices[0][np.newaxis,:]
-    
-    print("u:",u)
-    print("v:",u)
-    print("pt:",pt)
-
-    smtx = np.vstack((u,v,pt)).T
-    print(smtx)
-    pjxymtx=np.array([[1,0,0],[0,1,0],[0,0,0]])
-    mtx1 = np.dot(smtx,pjxymtx)
-    smtxinv = np.linalg.inv(smtx)
-    mtx2 = np.dot(mtx1,smtxinv)
-    print(np.dot(mtx2,w.T))
-    return 
+    for i in range(nFaces):
+        #triangle i vertices
+        vertices = getIcosaedreVertices()[icoTriangs[i]]
+        #The pt at the surface  triangle as barycenter of the vertices
+        ptOnFace = a * vertices[0] + b * vertices[1] + (1-a-b) * vertices[2]
+        #put it on the sphere
+        ptOnsphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
+        #retreive the (a,b) coordinate
+        an,bn = getBarycentricCoordExtension(ptOnsphere,icoTriangs,vertices,i)
+        if np.isclose(an,a) and np.isclose(bn,b):
+            print(f"test on face {i} Ok")
+        else:
+            print(f"test on face {i} NOK: {a} != {an} or {b} != {bn}")
 
 
-# In[186]:
+# In[286]:
 
 
-getBarycentricCoordExtension(pt1sphere,1)
+testBaryCoordExt()
 
 
-# In[179]:
-
-
-pt1
-
+# # Find hexagone index once the barycentric coordinates are found 
 
 # In[ ]:
 
