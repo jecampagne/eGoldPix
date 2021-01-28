@@ -1314,8 +1314,10 @@ testBaryCoordExt()
 
 
 # # Find hexagone index once the barycentric coordinates are found 
+# on suppose que l'on est sur la face 0
 
-# In[302]:
+# In[404]:
+
 
 
 #
@@ -1328,6 +1330,22 @@ norder = 5
 # (a,b) bary of pt
 a=0.5
 b=0.5
+# We are on Face 0
+icoTriangs = getIcoTriangs(modif=True)
+icoVertices0 = getIcosaedreVertices()[icoTriangs[0]]
+#
+### Attention    0
+###             /  \
+##             /    \
+##            1      2
+## les coord de V0(0,sqrt(3)/2) V1(-1/2,0) et V2(1/2,0)
+### avec ptOnFace = a * icoVertices0[0] + b * icoVertices0[1] + (1-a-b) * icoVertices0[2]
+##   a=b=1/2 se trouve au milieu du segment [V0, V1]
+
+ptOnFace = a * icoVertices0[0] + b * icoVertices0[1] + (1-a-b) * icoVertices0[2]
+
+ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
+
 # (x,y) of the pt
 xp = 0.5*(1+a)-b
 yp = a*sqrt(3)/2
@@ -1338,29 +1356,126 @@ jhexa = np.floor(norder*a).astype(np.int64)
 ihexa = np.floor(norder*(1-b)).astype(np.int64) 
 
 
-# In[313]:
+# In[405]:
 
 
 ihexa,jhexa
 
 
-# In[310]:
+# Verifions que la tuile pointee est la bonne: on va le faire explicitement avec toutes les tuiles de la face 0 a l'ordre norder mais ca ne serait pas possible avec 1 millard de pixels
+
+# In[391]:
 
 
-#tuiles de la face 0
+#get the locations of the hexagons vertices (faces), centers, index and types
 faces0, centers0, indexes0, types0 = buildFace0(n=norder)
 
 
-# In[311]:
+# In[392]:
 
 
-indexes0
+#put the infos on a Pandas DF (necessary? pour le merge des tuiles a cheval sur des faces....
+df = pd.DataFrame(columns=['idx','type','center','vertices'])
 
 
-# In[309]:
+# In[393]:
 
 
+df['idx']=indexes0
 
+
+# In[394]:
+
+
+df['type']=types0
+
+
+# In[395]:
+
+
+df['center']=centers0
+
+
+# In[396]:
+
+
+df['vertices']=faces0
+
+
+# In[397]:
+
+
+df
+
+
+# In[398]:
+
+
+cut = df.idx == (0,ihexa,jhexa)
+df[cut]['center'].values[0]
+
+
+# In[399]:
+
+
+tmp = df[cut]['vertices'].values
+
+
+# In[400]:
+
+
+tmp[0][0,:]
+
+
+# In[401]:
+
+
+xf,yf,zf = face[0,:],face[1,:],face[2,:]
+                    
+
+
+# In[406]:
+
+
+fig = plt.figure()
+
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)    
+colors = cm.rainbow(np.linspace(0, 1, nfaces))
+
+
+#Draw axe0
+plotFaceI(k=0, ax=ax)
+
+
+#extract info from the dataframe
+cut = df.idx == (0,ihexa,jhexa)
+centerf = df[cut]['center'].values[0]
+
+face= df[cut]['vertices'].values[0]
+
+xf,yf,zf = face[0,:],face[1,:],face[2,:]
+#current point projected On face 0
+ax.scatter(ptOnFace[0],ptOnFace[1],ptOnFace[2],marker='o',s=10,color='red')
+ax.scatter(ptOnSphere[0],ptOnSphere[1],ptOnSphere[2],marker='o',s=10,color='red')
+
+
+ax.scatter(centerf[0],centerf[1],centerf[2],marker='x',s=10,color='blue')
+ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
+                                        facecolors = "white", 
+                                        edgecolors='k', 
+                                     linewidths=1, alpha=0.5))
+#ax.text(centerf[0]*1.01,centerf[1]*1.01,centerf[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),size=10, zorder=1, color='k')
+
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)
+ax.set_xlim3d([-1,1])
+ax.set_ylim3d([-1,1])
+ax.set_zlim3d([-1,1])
+plt.show()
 
 
 # In[ ]:
