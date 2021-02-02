@@ -739,7 +739,7 @@ for k in range(20):
     print(f"verif {k}:" + str(np.allclose(np.matmul(mtx02I[k],mtxI20[k]),np.identity(3))))
 
 
-# In[26]:
+# In[407]:
 
 
 def buildFace0(n=5):
@@ -813,19 +813,6 @@ def buildFace0(n=5):
                 types.append(opt)
             
     return faces, centers, indexes, types
-#######################################
-#            xf,yf,zf = face[0,:],face[1,:],face[2,:]
-#            vertsf = np.array(list(zip(xf,yf,zf)))
-#            print("pts: ",vertsf)
-#            print("...  ",face)
-#           print("...  ",face.shape)
-#            print("...  ",(icoPoints[0:3].T).shape)
-#            verticesI=np.einsum('jk,kl->jl', faceMtx[1],face)
-#            print("...  ",verticesI.shape)
-#            #plot
-#            ax.scatter(center[0],center[1],center[2],marker='x',s=10,color=colors[k])
-#            ax.add_collection3d(Poly3DCollection([vertsf], 
-#                                                facecolors = colors[k], edgecolors='k', linewidths=1, alpha=0.9)
 
 
 # In[27]:
@@ -1275,7 +1262,31 @@ def getBarycentricCoord(pt,face):
 
 # # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
 
-# In[284]:
+# In[516]:
+
+
+def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
+    """
+        pt (x,y,z) on the sphere
+        face: index of icosahedron face
+        vertices: triplet of vertices of the icosahedron face
+    """
+    u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
+    v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
+    w = pt - vertices[0][np.newaxis,:]
+    # S=[u,v,OPshere]
+    smtx = np.vstack((u,v,pt)).T
+    null = np.zeros_like(u)
+    mtx1 = np.vstack((u,v,null)).T
+    smtxinv = np.linalg.inv(smtx)
+    mtx2 = mtx1 @ smtxinv
+    #OPproj on planar traingle = OV0 + S diag(1,1,0) S^-1 V0Ps
+    pproj = np.dot(mtx2,w.T).T+vertices[0][np.newaxis,:]
+    return getBarycentricCoord(pproj,face)
+    
+
+
+# In[517]:
 
 
 def testBaryCoordExt(a=0.1,b=0.7):
@@ -1307,7 +1318,7 @@ def testBaryCoordExt(a=0.1,b=0.7):
             print(f"test on face {i} NOK: {a} != {an} or {b} != {bn}")
 
 
-# In[286]:
+# In[518]:
 
 
 testBaryCoordExt()
@@ -1316,7 +1327,7 @@ testBaryCoordExt()
 # # Find hexagone index once the barycentric coordinates are found 
 # on suppose que l'on est sur la face 0
 
-# In[404]:
+# In[486]:
 
 
 
@@ -1328,8 +1339,8 @@ testBaryCoordExt()
 xlc,ylc = -1/2,0
 norder = 5
 # (a,b) bary of pt
-a=0.5
-b=0.5
+a=0.1
+b=0.7
 # We are on Face 0
 icoTriangs = getIcoTriangs(modif=True)
 icoVertices0 = getIcosaedreVertices()[icoTriangs[0]]
@@ -1347,16 +1358,14 @@ ptOnFace = a * icoVertices0[0] + b * icoVertices0[1] + (1-a-b) * icoVertices0[2]
 ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
 
 # (x,y) of the pt
-xp = 0.5*(1+a)-b
-yp = a*sqrt(3)/2
-#
-####jhexa = np.floor((2*n)/sqrt(3)*(yp-ylc))
-####ihexa = np.floor(n*((xp-xlc)-(yp-yc)/sqrt(3)))
-jhexa = np.floor(norder*a).astype(np.int64) 
-ihexa = np.floor(norder*(1-b)).astype(np.int64) 
+xp=(b-a)/2
+yp=(1-a-b)*sqrt(3)/2
+# (i,j) index
+ihexa = np.ceil(norder*b).astype(np.int64) 
+jhexa = np.ceil(norder*(1-a-b)).astype(np.int64) 
 
 
-# In[405]:
+# In[487]:
 
 
 ihexa,jhexa
@@ -1364,77 +1373,52 @@ ihexa,jhexa
 
 # Verifions que la tuile pointee est la bonne: on va le faire explicitement avec toutes les tuiles de la face 0 a l'ordre norder mais ca ne serait pas possible avec 1 millard de pixels
 
-# In[391]:
+# In[488]:
 
 
 #get the locations of the hexagons vertices (faces), centers, index and types
 faces0, centers0, indexes0, types0 = buildFace0(n=norder)
-
-
-# In[392]:
-
-
 #put the infos on a Pandas DF (necessary? pour le merge des tuiles a cheval sur des faces....
 df = pd.DataFrame(columns=['idx','type','center','vertices'])
-
-
-# In[393]:
-
-
 df['idx']=indexes0
-
-
-# In[394]:
-
-
 df['type']=types0
-
-
-# In[395]:
-
-
 df['center']=centers0
-
-
-# In[396]:
-
-
 df['vertices']=faces0
 
 
-# In[397]:
+# In[494]:
 
 
 df
 
 
-# In[398]:
+# In[495]:
 
 
 cut = df.idx == (0,ihexa,jhexa)
 df[cut]['center'].values[0]
 
 
-# In[399]:
+# In[496]:
 
 
 tmp = df[cut]['vertices'].values
 
 
-# In[400]:
+# In[481]:
 
 
 tmp[0][0,:]
 
 
-# In[401]:
+# In[482]:
 
 
 xf,yf,zf = face[0,:],face[1,:],face[2,:]
                     
 
 
-# In[406]:
+# In[483]:
 
 
 fig = plt.figure()
@@ -1476,6 +1460,48 @@ ax.set_xlim3d([-1,1])
 ax.set_ylim3d([-1,1])
 ax.set_zlim3d([-1,1])
 plt.show()
+
+
+# In[515]:
+
+
+arr = np.linspace(0,1,100)
+brr = np.linspace(0,1,100)
+fig = plt.figure()
+for i in range(arr.shape[0]):
+    a = arr[i]
+    for j in range(brr.shape[0]):
+        b = brr[j]
+        if a+b>1: 
+            continue
+        c = 1-a-b
+        pt = np.array([(b-a)/2, c*np.sqrt(3)/2])
+        plt.scatter(pt[0],pt[1],s=0.1)
+plt.show()
+
+
+# In[506]:
+
+
+tmp = np.array([0.5,np.sqrt(3)/2])
+
+
+# In[509]:
+
+
+print(tmp)
+
+
+# In[511]:
+
+
+tmp[0]
+
+
+# In[512]:
+
+
+tmp[1]
 
 
 # In[ ]:
