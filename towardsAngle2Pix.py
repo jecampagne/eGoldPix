@@ -13,7 +13,7 @@ import matplotlib.cm as cm
 from math import sin,cos,acos,sqrt,pi, atan2
 
 import pandas as pd
-
+from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
@@ -815,16 +815,16 @@ def buildFace0(n=5):
     return faces, centers, indexes, types
 
 
-# In[27]:
+# In[585]:
 
 
-def plotFaceI(k=0, ax=None):
+def plotFaceI(k=0, ax=None, n=5):
     '''
         k : index of Icosahedre face
     '''
     
     #Get tiles of Face 0
-    faces0, centers0, indexes0, types0 = buildFace0()
+    faces0, centers0, indexes0, types0 = buildFace0(n)
     collectFaces0 = np.hstack(faces0)  #collect all tiles of face 0
     centers0 = np.array(centers0)
     
@@ -1234,7 +1234,7 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[81]:
+# In[603]:
 
 
 def getBarycentricCoord(pt,face):
@@ -1257,12 +1257,12 @@ def getBarycentricCoord(pt,face):
     a0 = np.sqrt((a0*a0).sum(axis=1))/aire0
     a1 = np.cross(vec2,vec0)
     a1 = np.sqrt((a1*a1).sum(axis=1))/aire0
-    return a0,a1
+    return a0[0],a1[0]
 
 
 # # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
 
-# In[516]:
+# In[604]:
 
 
 def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
@@ -1286,7 +1286,7 @@ def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
     
 
 
-# In[517]:
+# In[605]:
 
 
 def testBaryCoordExt(a=0.1,b=0.7):
@@ -1318,7 +1318,7 @@ def testBaryCoordExt(a=0.1,b=0.7):
             print(f"test on face {i} NOK: {a} != {an} or {b} != {bn}")
 
 
-# In[518]:
+# In[606]:
 
 
 testBaryCoordExt()
@@ -1327,10 +1327,94 @@ testBaryCoordExt()
 # # Find hexagone index once the barycentric coordinates are found 
 # on suppose que l'on est sur la face 0
 
-# In[486]:
+# Prenons la face 0: avec les coord barycentriques des centres des hexag. peut-on retrouver leurs indices (i,j)? 
+
+# In[488]:
 
 
+#get the locations of the hexagons vertices (faces), centers, index and types
+norder=5
+faces0, centers0, indexes0, types0 = buildFace0(n=norder)
+#put the infos on a Pandas DF (necessary? pour le merge des tuiles a cheval sur des faces....
+df = pd.DataFrame(columns=['idx','type','center','vertices'])
+df['idx']=indexes0
+df['type']=types0
+df['center']=centers0
+df['vertices']=faces0
 
+
+# Trouver les coord barycentrique des centres des tuiles hexa 
+
+# In[560]:
+
+
+#on est sur la face 0 de l'icosaedre
+face=0
+icoTriangs = getIcoTriangs(modif=True)
+vertices0 = getIcosaedreVertices()[icoTriangs[face]]
+df['baryCoord']=df['center'].map(lambda pt: list(flatten(getBarycentricCoordExtension(pt,icoTriangs,vertices0,face))))
+
+
+# In[561]:
+
+
+df
+
+
+# In[565]:
+
+
+df.iloc[11]
+
+
+# test avec la tuile 11
+
+# In[571]:
+
+
+norder = 5
+a,b = df.iloc[11]['baryCoord']
+print("a,b: ",a,b,' idx:', df.iloc[11]['idx'])
+# (x,y) of the pt
+xp=(b-a)/2
+yp=(1-a-b)*sqrt(3)/2
+# (i,j) index
+ihexa = int(round(norder*b))
+jhexa = int(round(norder*(1-a-b)))
+print("i,j approx: ",ihexa,jhexa)
+
+
+# Appliquons la methdoe de rounding sur l'ensemble des centres des tuiles
+
+# In[577]:
+
+
+def ijapp(x, norder=5):
+    a = x[0]
+    b = x[1]
+    ihexa = int(round(norder*b))
+    jhexa = int(round(norder*(1-a-b)))
+    return (0,ihexa,jhexa)
+
+
+# In[582]:
+
+
+df['idxApp']=df['baryCoord'].apply(ijapp)
+
+
+# In[583]:
+
+
+df['idx']==df['idxApp']
+
+
+# Donc ca marche pour les centres des tuiles hexagonales. Maintenant quel est la zone geographique sur la sphere qui donne le même (i,j) ? 
+
+# In[584]:
+
+
+"""
 #
 #    x,y = -1/2,0
 #    scale = 1/(n*sqrt(3)) 
@@ -1361,64 +1445,12 @@ ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
 xp=(b-a)/2
 yp=(1-a-b)*sqrt(3)/2
 # (i,j) index
-ihexa = np.ceil(norder*b).astype(np.int64) 
+ihexa = int(round(norder*b))
 jhexa = np.ceil(norder*(1-a-b)).astype(np.int64) 
+"""
 
 
-# In[487]:
-
-
-ihexa,jhexa
-
-
-# Verifions que la tuile pointee est la bonne: on va le faire explicitement avec toutes les tuiles de la face 0 a l'ordre norder mais ca ne serait pas possible avec 1 millard de pixels
-
-# In[488]:
-
-
-#get the locations of the hexagons vertices (faces), centers, index and types
-faces0, centers0, indexes0, types0 = buildFace0(n=norder)
-#put the infos on a Pandas DF (necessary? pour le merge des tuiles a cheval sur des faces....
-df = pd.DataFrame(columns=['idx','type','center','vertices'])
-df['idx']=indexes0
-df['type']=types0
-df['center']=centers0
-df['vertices']=faces0
-
-
-# In[494]:
-
-
-df
-
-
-# In[495]:
-
-
-cut = df.idx == (0,ihexa,jhexa)
-df[cut]['center'].values[0]
-
-
-# In[496]:
-
-
-tmp = df[cut]['vertices'].values
-
-
-# In[481]:
-
-
-tmp[0][0,:]
-
-
-# In[482]:
-
-
-xf,yf,zf = face[0,:],face[1,:],face[2,:]
-                    
-
-
-# In[483]:
+# In[609]:
 
 
 fig = plt.figure()
@@ -1429,29 +1461,38 @@ ax.set_ylabel(r'$Y$', fontsize=20)
 ax.set_zlabel(r'$Z$', fontsize=20)    
 colors = cm.rainbow(np.linspace(0, 1, nfaces))
 
+icoTriangs = getIcoTriangs(modif=True)
+icoVertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
-#Draw axe0
-plotFaceI(k=0, ax=ax)
+# ordre de la pixelization
+norder = 5
 
+#Draw face 0 
+face=0
+plotFaceI(k=face, ax=ax, n=norder)
 
-#extract info from the dataframe
-cut = df.idx == (0,ihexa,jhexa)
-centerf = df[cut]['center'].values[0]
+itest = 2
+jtest = 2
 
-face= df[cut]['vertices'].values[0]
-
-xf,yf,zf = face[0,:],face[1,:],face[2,:]
-#current point projected On face 0
-ax.scatter(ptOnFace[0],ptOnFace[1],ptOnFace[2],marker='o',s=10,color='red')
-ax.scatter(ptOnSphere[0],ptOnSphere[1],ptOnSphere[2],marker='o',s=10,color='red')
-
-
-ax.scatter(centerf[0],centerf[1],centerf[2],marker='x',s=10,color='blue')
-ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
-                                        facecolors = "white", 
-                                        edgecolors='k', 
-                                     linewidths=1, alpha=0.5))
-#ax.text(centerf[0]*1.01,centerf[1]*1.01,centerf[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),size=10, zorder=1, color='k')
+arr = np.linspace(0,1,100)
+brr = np.linspace(0,1,100)
+for i in range(arr.shape[0]):
+    a0 = arr[i]
+    for j in range(brr.shape[0]):
+        b0 = brr[j]
+        if a0+b0>1: 
+            continue
+        c0 = 1-a0-b0
+        ptOnFace = a0 * icoVertices0[0] + b0 * icoVertices0[1] + c0 * icoVertices0[2]
+        ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
+        #get a,b
+        a,b = getBarycentricCoordExtension(ptOnSphere,icoTriangs,vertices0,face)
+        c = 1-a-b
+        # (i,j) index
+        ihexa = int(round(norder*b))
+        jhexa = int(round(norder*c))
+        if (ihexa == itest) and (jhexa == jtest) :
+            ax.scatter(ptOnSphere[0],ptOnSphere[1],ptOnSphere[2],marker='.',color='red')
 
 ax.set_xlabel(r'$X$', fontsize=20)
 ax.set_ylabel(r'$Y$', fontsize=20)
@@ -1478,30 +1519,6 @@ for i in range(arr.shape[0]):
         pt = np.array([(b-a)/2, c*np.sqrt(3)/2])
         plt.scatter(pt[0],pt[1],s=0.1)
 plt.show()
-
-
-# In[506]:
-
-
-tmp = np.array([0.5,np.sqrt(3)/2])
-
-
-# In[509]:
-
-
-print(tmp)
-
-
-# In[511]:
-
-
-tmp[0]
-
-
-# In[512]:
-
-
-tmp[1]
 
 
 # In[ ]:
