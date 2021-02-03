@@ -739,7 +739,7 @@ for k in range(20):
     print(f"verif {k}:" + str(np.allclose(np.matmul(mtx02I[k],mtxI20[k]),np.identity(3))))
 
 
-# In[407]:
+# In[78]:
 
 
 def buildFace0(n=5):
@@ -815,7 +815,7 @@ def buildFace0(n=5):
     return faces, centers, indexes, types
 
 
-# In[585]:
+# In[75]:
 
 
 def plotFaceI(k=0, ax=None, n=5):
@@ -888,6 +888,12 @@ def plotFaceI(k=0, ax=None, n=5):
 
 
 #faces0, centers0, indexes0, types0 = buildFace0()
+
+
+# In[79]:
+
+
+plotFaceI(k=0)
 
 
 # In[29]:
@@ -966,7 +972,7 @@ def pt3DtoSpherical(xyz):
     return np.array([theta,phi]).T
 
 
-# In[861]:
+# In[ ]:
 
 
 
@@ -1096,7 +1102,7 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[43]:
+# In[42]:
 
 
 Npts = 100  # ATTENTION Nptsx Npts points....
@@ -1105,7 +1111,7 @@ someOnSpherePts = np.array([theta.reshape(-1,),phi.reshape(-1,)]).T
 print("Nbre de pts: ",someOnSpherePts.shape[0])
 
 
-# In[78]:
+# In[43]:
 
 
 get_ipython().run_cell_magic('timeit', '', '"""\nTiming angle2FaceId_fullVectorized\n"""\nangle2FaceId_fullVectorized(someOnSpherePts, icoTriangCenters)')
@@ -1115,63 +1121,63 @@ get_ipython().run_cell_magic('timeit', '', '"""\nTiming angle2FaceId_fullVectori
 
 # # angle2Pix for a Point on a Face
 
-# In[54]:
+# In[44]:
 
 
 getIcosaedreVertices()
 
 
-# In[55]:
+# In[45]:
 
 
 icoTriangs = getIcoTriangs(modif=True)
 
 
-# In[56]:
+# In[46]:
 
 
 icoTriangs[0]
 
 
-# In[57]:
+# In[47]:
 
 
 #triplet of vertices of Face 0
 vertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
 
-# In[58]:
+# In[48]:
 
 
 vertices0
 
 
-# In[59]:
+# In[49]:
 
 
 #triplet of vertices of Face 1
 vertices1 = getIcosaedreVertices()[icoTriangs[1]]
 
 
-# In[60]:
+# In[50]:
 
 
 vertices1
 
 
-# In[61]:
+# In[51]:
 
 
 angle2FaceId_fullVectorized(angleicoTriangCenters, icoTriangCenters)
 
 
-# In[62]:
+# In[52]:
 
 
 angleicoTriangCenters
 
 
-# In[94]:
+# In[53]:
 
 
 # 1 point dans la face 1
@@ -1182,13 +1188,13 @@ pt1 = a * vertices1[0] + b * vertices1[1] + (1-a-b) * vertices1[2]
 pt1 = pt1[np.newaxis,:]
 
 
-# In[64]:
+# In[54]:
 
 
 pt1.shape
 
 
-# In[65]:
+# In[55]:
 
 
 #matrice de Face I a Face 0
@@ -1196,14 +1202,14 @@ mtxI20 = getFaceIToface0Mtx()
 mtx120 = mtxI20[1]
 
 
-# In[82]:
+# In[56]:
 
 
 #rotate to get the corresponding point on face0
 pt0 = np.matmul(mtx120,pt1.T).T
 
 
-# In[80]:
+# In[57]:
 
 
 fig = plt.figure()
@@ -1234,7 +1240,7 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[603]:
+# In[58]:
 
 
 def getBarycentricCoord(pt,face):
@@ -1262,7 +1268,7 @@ def getBarycentricCoord(pt,face):
 
 # # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
 
-# In[604]:
+# In[59]:
 
 
 def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
@@ -1286,7 +1292,7 @@ def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
     
 
 
-# In[605]:
+# In[60]:
 
 
 def testBaryCoordExt(a=0.1,b=0.7):
@@ -1318,7 +1324,7 @@ def testBaryCoordExt(a=0.1,b=0.7):
             print(f"test on face {i} NOK: {a} != {an} or {b} != {bn}")
 
 
-# In[606]:
+# In[61]:
 
 
 testBaryCoordExt()
@@ -1329,7 +1335,7 @@ testBaryCoordExt()
 
 # Prenons la face 0: avec les coord barycentriques des centres des hexag. peut-on retrouver leurs indices (i,j)? 
 
-# In[488]:
+# In[62]:
 
 
 #get the locations of the hexagons vertices (faces), centers, index and types
@@ -1345,23 +1351,23 @@ df['vertices']=faces0
 
 # Trouver les coord barycentrique des centres des tuiles hexa 
 
-# In[560]:
+# In[64]:
 
 
 #on est sur la face 0 de l'icosaedre
 face=0
 icoTriangs = getIcoTriangs(modif=True)
 vertices0 = getIcosaedreVertices()[icoTriangs[face]]
-df['baryCoord']=df['center'].map(lambda pt: list(flatten(getBarycentricCoordExtension(pt,icoTriangs,vertices0,face))))
+df['baryCoord']=df['center'].map(lambda pt: list(getBarycentricCoordExtension(pt,icoTriangs,vertices0,face)))
 
 
-# In[561]:
+# In[65]:
 
 
 df
 
 
-# In[565]:
+# In[66]:
 
 
 df.iloc[11]
@@ -1369,7 +1375,7 @@ df.iloc[11]
 
 # test avec la tuile 11
 
-# In[571]:
+# In[67]:
 
 
 norder = 5
@@ -1386,7 +1392,7 @@ print("i,j approx: ",ihexa,jhexa)
 
 # Appliquons la methdoe de rounding sur l'ensemble des centres des tuiles
 
-# In[577]:
+# In[68]:
 
 
 def ijapp(x, norder=5):
@@ -1397,13 +1403,13 @@ def ijapp(x, norder=5):
     return (0,ihexa,jhexa)
 
 
-# In[582]:
+# In[69]:
 
 
 df['idxApp']=df['baryCoord'].apply(ijapp)
 
 
-# In[583]:
+# In[70]:
 
 
 df['idx']==df['idxApp']
@@ -1411,7 +1417,7 @@ df['idx']==df['idxApp']
 
 # Donc ca marche pour les centres des tuiles hexagonales. Maintenant quel est la zone geographique sur la sphere qui donne le même (i,j) ? 
 
-# In[584]:
+# In[71]:
 
 
 """
@@ -1450,7 +1456,7 @@ jhexa = np.ceil(norder*(1-a-b)).astype(np.int64)
 """
 
 
-# In[609]:
+# In[82]:
 
 
 fig = plt.figure()
@@ -1465,7 +1471,7 @@ icoTriangs = getIcoTriangs(modif=True)
 icoVertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
 # ordre de la pixelization
-norder = 5
+norder = 10
 
 #Draw face 0 
 face=0
@@ -1503,22 +1509,10 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[515]:
+# In[73]:
 
 
-arr = np.linspace(0,1,100)
-brr = np.linspace(0,1,100)
-fig = plt.figure()
-for i in range(arr.shape[0]):
-    a = arr[i]
-    for j in range(brr.shape[0]):
-        b = brr[j]
-        if a+b>1: 
-            continue
-        c = 1-a-b
-        pt = np.array([(b-a)/2, c*np.sqrt(3)/2])
-        plt.scatter(pt[0],pt[1],s=0.1)
-plt.show()
+
 
 
 # In[ ]:
