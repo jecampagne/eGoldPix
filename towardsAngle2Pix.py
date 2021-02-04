@@ -1456,7 +1456,7 @@ jhexa = np.ceil(norder*(1-a-b)).astype(np.int64)
 """
 
 
-# In[82]:
+# In[100]:
 
 
 fig = plt.figure()
@@ -1471,7 +1471,7 @@ icoTriangs = getIcoTriangs(modif=True)
 icoVertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
 # ordre de la pixelization
-norder = 10
+norder = 6
 
 #Draw face 0 
 face=0
@@ -1479,6 +1479,13 @@ plotFaceI(k=face, ax=ax, n=norder)
 
 itest = 2
 jtest = 2
+
+nbcenters = findNeightboorsHexagCenter(itest,jtest,n=norder)
+for xnb,ynb,znb in nbcenters:
+    ax.scatter(xnb,ynb,znb,marker='o',color='green')
+
+
+
 
 arr = np.linspace(0,1,100)
 brr = np.linspace(0,1,100)
@@ -1509,10 +1516,181 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[73]:
+# In[89]:
 
 
+def getHexInfos(i,j, n=5):        
+    if i==0:
+        th = -2*pi/3
+        if j==1:
+            opt = 3
+        elif j==n-i-1:
+            opt = 4
+        else:
+            opt = 2
+    elif j==n-i: 
+        th = 2*pi/3
+        if i==1:
+            opt = 3
+        elif i==n-1:
+            opt = 4
+        else:
+            opt = 2
+    elif (j==0 and i != 0):
+        th = 0
+        if i==1:
+            opt = 4
+        elif i==n-1:
+            opt = 3
+        else:
+            opt = 2
+    else:
+        opt = 1
+        th = 0
 
+    return opt,th
+        
+
+
+# In[110]:
+
+
+def getHexagoneCenter(i,j,icoTriangs, icoPoints, x=-1/2,y=0,n=5):
+        hexagcenter = np.array([x+i*1/n+j*1/(2*n), y+j*sqrt(3)/(2*n)])
+        a = icoTriangs[0,0]
+        b = icoTriangs[0,1]
+        c = icoTriangs[0,2]
+        return getProjectedPt(hexagcenter,icoPoints,a,b,c)
+
+
+# In[103]:
+
+
+def findNeightboorsHexagCenter(i,j,n=5):
+    """
+     implicit in the face 0 of the icosahedron
+     (i,j): couple of indexex 
+     
+     ignoring edge-effect the 6 neightboors are
+             (i,j-1) (i-1,j)
+        (i+1,j-1) (i,j) (i-1,j+1)
+              (i+1,j) (i,j+1)            
+     
+    """
+    
+    indexes = [(i,j),(i,j-1),(i-1,j),(i-1,j+1),(i,j+1),(i+1,j),(i+1,j-1)]
+    
+    # Voir BuildFace0
+    # localisation bottom left vertices
+    icoTriangs = getIcoTriangs(modif=True)
+    #icosedre vertices
+    icoPoints = getIcosaedreVertices()
+
+    centers = []
+    
+    for (ic,jc) in indexes:
+        #exclude the hexagons at the vertices of the isocele triangle
+        if (ic==0 and jc==0) or (ic==0 and jc==n) or (ic==n and jc==0):
+            continue
+        
+        #on ne se sert pas du dataframe car on veut une fonction
+        center = getHexagoneCenter(ic,jc,icoTriangs,icoPoints, n=n)
+        #save
+        centers.append(center)
+    
+    return np.array(centers)
+        
+
+
+# In[111]:
+
+
+findNeightboorsHexagCenter(2,2)
+
+
+# In[131]:
+
+
+def findClosest(pt,pts):
+    """
+    find the closest point to "p" in the list "pts"
+    p: (x,y,z)
+    pts : a list of (xi,yi,zi)
+    
+    """
+    return np.argmax(np.einsum('jk,kl->jl',pts,pt[:,np.newaxis]),axis=0)
+
+
+# In[136]:
+
+
+fig = plt.figure()
+
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)    
+colors = cm.rainbow(np.linspace(0, 1, nfaces))
+
+icoTriangs = getIcoTriangs(modif=True)
+
+#icosedre vertices
+icoPoints = getIcosaedreVertices()
+face=0
+icoVertices0 = icoPoints[icoTriangs[face]]
+# ordre de la pixelization
+norder = 6
+
+#Draw face 0 
+plotFaceI(k=face, ax=ax, n=norder)
+
+#index of a target hexagon
+itest = 2
+jtest = 2
+# target hexagon center
+xyzTest = getHexagoneCenter(itest,jtest,icoTriangs, icoPoints,n=norder)
+ax.scatter(xyzTest[0],xyzTest[1],xyzTest[2],marker='o',color='blue')
+
+
+#tirage de pts dans le triangle equilateral
+arr = np.linspace(0,1,100)
+brr = np.linspace(0,1,100)
+for i in range(arr.shape[0]):
+    a0 = arr[i]
+    for j in range(brr.shape[0]):
+        b0 = brr[j]
+        if a0+b0>1: 
+            continue
+        c0 = 1-a0-b0
+        #coord du pt dans le traingle plat
+        ptOnFace = a0 * icoVertices0[0] + b0 * icoVertices0[1] + c0 * icoVertices0[2]
+        #coord du pt dans le traingle spherique
+        ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
+        #get a,b
+        a,b = getBarycentricCoordExtension(ptOnSphere,icoTriangs,vertices0,face)
+        c = 1-a-b
+        # (i,j) index
+        ihexa = int(round(norder*b))
+        jhexa = int(round(norder*c))
+        
+        #les voisins
+        centernbs = findNeightboorsHexagCenter(ihexa,jhexa,n=norder)
+        #le plus proche de ptOnSphere
+        iloc = findClosest(ptOnSphere,centernbs)
+        centerClosest = centernbs[iloc]
+        #    ptOnSphere is close to the center of target hexagon
+        if(np.allclose(centerClosest,xyzTest)):
+            ax.scatter(ptOnSphere[0],ptOnSphere[1],ptOnSphere[2],marker='.',color='red')
+
+        
+        
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)
+ax.set_xlim3d([-1,1])
+ax.set_ylim3d([-1,1])
+ax.set_zlim3d([-1,1])
+plt.show()
 
 
 # In[ ]:
