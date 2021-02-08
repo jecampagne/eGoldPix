@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[92]:
 
 
 import numpy as np
@@ -15,6 +15,8 @@ from math import sin,cos,acos,sqrt,pi, atan2
 import pandas as pd
 from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
+
+from scipy import stats
 
 
 # In[2]:
@@ -1563,7 +1565,7 @@ def getHexagoneCenter(i,j,icoTriangs, icoPoints, x=-1/2,y=0,n=5):
         return getProjectedPt(hexagcenter,icoPoints,a,b,c)
 
 
-# In[86]:
+# In[90]:
 
 
 def findNeightboorsHexagCenter(a,b,n=5,full=True):
@@ -1584,18 +1586,18 @@ def findNeightboorsHexagCenter(a,b,n=5,full=True):
     # (i,j) index target    
     i = int(round(bscaled))
     j = int(round(cscaled))
-
+    
     #Choose indexes of the hexagones to test for closest approach
     if full:
         indexes = [(i,j),(i,j-1),(i-1,j),(i-1,j+1),(i,j+1),(i+1,j),(i+1,j-1)]
     else:
-        if bscaled >= ihexa:
-            if cscaled >= jhexa:
+        if bscaled >= i:
+            if cscaled >= j:
                 indexes = [(i,j),(i,j+1),(i+1,j)]
             else:
                 indexes = [(i,j),(i,j-1),(i+1,j),(i+1,j-1)]
         else:
-            if cscaled >= jhexa:
+            if cscaled >= j:
                 indexes = [(i,j),(i-1,j),(i-1,j+1),(i,j+1)]
             else:
                 indexes = [(i,j),(i,j-1),(i-1,j)]
@@ -1636,7 +1638,7 @@ def findClosest(pt,pts):
     return np.argmax(np.einsum('jk,kl->jl',pts,pt[:,np.newaxis]),axis=0)
 
 
-# In[88]:
+# In[95]:
 
 
 fig = plt.figure()
@@ -1670,6 +1672,7 @@ ax.scatter(xyzTest[0],xyzTest[1],xyzTest[2],marker='o',color='blue')
 #tirage de pts dans le triangle equilateral
 arr = np.linspace(0,1,100)
 brr = np.linspace(0,1,100)
+ntests = []
 for i in range(arr.shape[0]):
     a0 = arr[i]
     for j in range(brr.shape[0]):
@@ -1685,7 +1688,8 @@ for i in range(arr.shape[0]):
         a,b = getBarycentricCoordExtension(ptOnSphere,icoTriangs,vertices0,face)
 #        print(a0,b0,a,b)
         #centres des hexagones cibles
-        centernbs = findNeightboorsHexagCenter(a,b,n=norder)
+        centernbs = findNeightboorsHexagCenter(a,b,n=norder,full=False)
+        ntests.append(centernbs.shape[0])
         #le plus proche de ptOnSphere
         iloc = findClosest(ptOnSphere,centernbs)
         centerClosest = centernbs[iloc]
@@ -1693,8 +1697,11 @@ for i in range(arr.shape[0]):
         if(np.allclose(centerClosest,xyzTest)):
             ax.scatter(ptOnSphere[0],ptOnSphere[1],ptOnSphere[2],marker='.',color='red')
 
-        
-        
+
+ntests = np.array(ntests)
+print(stats.describe(ntests))
+
+
 ax.set_xlabel(r'$X$', fontsize=20)
 ax.set_ylabel(r'$Y$', fontsize=20)
 ax.set_zlabel(r'$Z$', fontsize=20)
@@ -1702,6 +1709,19 @@ ax.set_xlim3d([-1,1])
 ax.set_ylim3d([-1,1])
 ax.set_zlim3d([-1,1])
 plt.show()
+
+
+# In[ ]:
+
+
+plt.hist(ntests)
+plt.show()
+
+
+# In[98]:
+
+
+ntests
 
 
 # In[ ]:
