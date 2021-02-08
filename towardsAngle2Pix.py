@@ -1505,7 +1505,7 @@ def getHexagoneCenter(i,j,icoTriangs, icoPoints, x=-1/2,y=0,n=5):
         return getProjectedPt(hexagcenter,icoPoints,a,b,c)
 
 
-# In[93]:
+# In[95]:
 
 
 def findNeightboorsHexagCenter(a,b,n=5,full=True):
@@ -1552,7 +1552,8 @@ def findNeightboorsHexagCenter(a,b,n=5,full=True):
     centers = []
     
     for (ic,jc) in indexes:
-        #exclude the hexagons at the vertices of the isocele triangle
+## On peut inclure les coins...     
+###exclude the hexagons at the vertices of the isocele triangle
 ##        if (ic==0 and jc==0) or (ic==0 and jc==n) or (ic==n and jc==0):
 ##            continue
         
@@ -1667,6 +1668,28 @@ plt.hist(ntests)
 
 
 plt.show()
+
+
+# In[96]:
+
+
+icoTriangs= getIcoTriangs(modif=True)
+icoPoints = getIcosaedreVertices()
+ 
+#vertices for Face 0
+icoVertices0 = icoPoints[icoTriangs[0]]
+
+
+# In[97]:
+
+
+icoVertices0
+
+
+# In[99]:
+
+
+icoTriangs[0][0]
 
 
 # In[ ]:
