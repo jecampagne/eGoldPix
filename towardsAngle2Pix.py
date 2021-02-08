@@ -739,7 +739,7 @@ for k in range(20):
     print(f"verif {k}:" + str(np.allclose(np.matmul(mtx02I[k],mtxI20[k]),np.identity(3))))
 
 
-# In[78]:
+# In[26]:
 
 
 def buildFace0(n=5):
@@ -815,7 +815,7 @@ def buildFace0(n=5):
     return faces, centers, indexes, types
 
 
-# In[75]:
+# In[27]:
 
 
 def plotFaceI(k=0, ax=None, n=5):
@@ -890,13 +890,13 @@ def plotFaceI(k=0, ax=None, n=5):
 #faces0, centers0, indexes0, types0 = buildFace0()
 
 
-# In[79]:
+# In[29]:
 
 
 plotFaceI(k=0)
 
 
-# In[29]:
+# In[30]:
 
 
 fig = plt.figure()
@@ -915,7 +915,7 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[30]:
+# In[31]:
 
 
 def pt3D2FaceId(pt,icoTriangCenters, zTh1, zTh2, full=True):
@@ -934,7 +934,7 @@ def pt3D2FaceId(pt,icoTriangCenters, zTh1, zTh2, full=True):
 
 
 
-# In[31]:
+# In[32]:
 
 
 def getIcoTriangCenters():
@@ -960,7 +960,7 @@ def getIcoTriangCenters():
 
 
 
-# In[32]:
+# In[33]:
 
 
 def pt3DtoSpherical(xyz):
@@ -978,7 +978,7 @@ def pt3DtoSpherical(xyz):
 
 
 
-# In[33]:
+# In[34]:
 
 
 # theta, phi angles of the 20 center of faces
@@ -986,7 +986,7 @@ icoTriangCenters = getIcoTriangCenters()
 angleicoTriangCenters= pt3DtoSpherical(icoTriangCenters)
 
 
-# In[34]:
+# In[35]:
 
 
 # theta, phi angles the 12 vertices
@@ -995,31 +995,31 @@ icoVertices = icoPoints
 angleicoVertices = pt3DtoSpherical(icoVertices)
 
 
-# In[35]:
+# In[36]:
 
 
 icoVertices
 
 
-# In[36]:
+# In[37]:
 
 
 angleicoVertices
 
 
-# In[37]:
+# In[38]:
 
 
 icoTriangCenters.shape
 
 
-# In[38]:
+# In[39]:
 
 
 angleicoTriangCenters.shape
 
 
-# In[39]:
+# In[40]:
 
 
 def angle2FaceId_fullVectorized(thetaPhi, icoTriangCenters):
@@ -1041,7 +1041,7 @@ def angle2FaceId_fullVectorized(thetaPhi, icoTriangCenters):
     return np.argmax(np.einsum('jk,kl->jl',icoTriangCenters,pt),axis=0)
 
 
-# In[40]:
+# In[41]:
 
 
 """
@@ -1055,7 +1055,7 @@ assert np.allclose(angle2FaceId_fullVectorized(angleicoTriangCenters[:N,:], icoT
                    truth), "Bug: The icosahedres faces must be on their faces!"
 
 
-# In[41]:
+# In[42]:
 
 
 """
@@ -1102,7 +1102,7 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[42]:
+# In[43]:
 
 
 Npts = 100  # ATTENTION Nptsx Npts points....
@@ -1111,7 +1111,7 @@ someOnSpherePts = np.array([theta.reshape(-1,),phi.reshape(-1,)]).T
 print("Nbre de pts: ",someOnSpherePts.shape[0])
 
 
-# In[43]:
+# In[44]:
 
 
 get_ipython().run_cell_magic('timeit', '', '"""\nTiming angle2FaceId_fullVectorized\n"""\nangle2FaceId_fullVectorized(someOnSpherePts, icoTriangCenters)')
@@ -1121,63 +1121,63 @@ get_ipython().run_cell_magic('timeit', '', '"""\nTiming angle2FaceId_fullVectori
 
 # # angle2Pix for a Point on a Face
 
-# In[44]:
+# In[45]:
 
 
 getIcosaedreVertices()
 
 
-# In[45]:
+# In[46]:
 
 
 icoTriangs = getIcoTriangs(modif=True)
 
 
-# In[46]:
+# In[47]:
 
 
 icoTriangs[0]
 
 
-# In[47]:
+# In[48]:
 
 
 #triplet of vertices of Face 0
 vertices0 = getIcosaedreVertices()[icoTriangs[0]]
 
 
-# In[48]:
+# In[49]:
 
 
 vertices0
 
 
-# In[49]:
+# In[50]:
 
 
 #triplet of vertices of Face 1
 vertices1 = getIcosaedreVertices()[icoTriangs[1]]
 
 
-# In[50]:
+# In[51]:
 
 
 vertices1
 
 
-# In[51]:
+# In[52]:
 
 
 angle2FaceId_fullVectorized(angleicoTriangCenters, icoTriangCenters)
 
 
-# In[52]:
+# In[53]:
 
 
 angleicoTriangCenters
 
 
-# In[53]:
+# In[54]:
 
 
 # 1 point dans la face 1
@@ -1188,13 +1188,13 @@ pt1 = a * vertices1[0] + b * vertices1[1] + (1-a-b) * vertices1[2]
 pt1 = pt1[np.newaxis,:]
 
 
-# In[54]:
+# In[55]:
 
 
 pt1.shape
 
 
-# In[55]:
+# In[56]:
 
 
 #matrice de Face I a Face 0
@@ -1202,14 +1202,14 @@ mtxI20 = getFaceIToface0Mtx()
 mtx120 = mtxI20[1]
 
 
-# In[56]:
+# In[57]:
 
 
 #rotate to get the corresponding point on face0
 pt0 = np.matmul(mtx120,pt1.T).T
 
 
-# In[57]:
+# In[58]:
 
 
 fig = plt.figure()
@@ -1240,7 +1240,7 @@ ax.set_zlim3d([-1.1,1.1])
 plt.show()
 
 
-# In[58]:
+# In[59]:
 
 
 def getBarycentricCoord(pt,face):
@@ -1268,7 +1268,7 @@ def getBarycentricCoord(pt,face):
 
 # # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
 
-# In[59]:
+# In[60]:
 
 
 def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
@@ -1292,7 +1292,7 @@ def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
     
 
 
-# In[60]:
+# In[61]:
 
 
 def testBaryCoordExt(a=0.1,b=0.7):
@@ -1324,7 +1324,7 @@ def testBaryCoordExt(a=0.1,b=0.7):
             print(f"test on face {i} NOK: {a} != {an} or {b} != {bn}")
 
 
-# In[61]:
+# In[62]:
 
 
 testBaryCoordExt()
@@ -1335,7 +1335,7 @@ testBaryCoordExt()
 
 # Prenons la face 0: avec les coord barycentriques des centres des hexag. peut-on retrouver leurs indices (i,j)? 
 
-# In[62]:
+# In[63]:
 
 
 #get the locations of the hexagons vertices (faces), centers, index and types
@@ -1456,7 +1456,7 @@ jhexa = np.ceil(norder*(1-a-b)).astype(np.int64)
 """
 
 
-# In[100]:
+# In[72]:
 
 
 fig = plt.figure()
@@ -1516,7 +1516,7 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[89]:
+# In[73]:
 
 
 def getHexInfos(i,j, n=5):        
@@ -1552,7 +1552,7 @@ def getHexInfos(i,j, n=5):
         
 
 
-# In[110]:
+# In[74]:
 
 
 def getHexagoneCenter(i,j,icoTriangs, icoPoints, x=-1/2,y=0,n=5):
@@ -1563,13 +1563,13 @@ def getHexagoneCenter(i,j,icoTriangs, icoPoints, x=-1/2,y=0,n=5):
         return getProjectedPt(hexagcenter,icoPoints,a,b,c)
 
 
-# In[103]:
+# In[86]:
 
 
-def findNeightboorsHexagCenter(i,j,n=5):
+def findNeightboorsHexagCenter(a,b,n=5,full=True):
     """
      implicit in the face 0 of the icosahedron
-     (i,j): couple of indexex 
+     (a,b) : barycentric coordinates of the point
      
      ignoring edge-effect the 6 neightboors are
              (i,j-1) (i-1,j)
@@ -1577,9 +1577,30 @@ def findNeightboorsHexagCenter(i,j,n=5):
               (i+1,j) (i,j+1)            
      
     """
-    
-    indexes = [(i,j),(i,j-1),(i-1,j),(i-1,j+1),(i,j+1),(i+1,j),(i+1,j-1)]
-    
+    c = 1-a-b        
+    bscaled = n*b
+    cscaled = n*c
+
+    # (i,j) index target    
+    i = int(round(bscaled))
+    j = int(round(cscaled))
+
+    #Choose indexes of the hexagones to test for closest approach
+    if full:
+        indexes = [(i,j),(i,j-1),(i-1,j),(i-1,j+1),(i,j+1),(i+1,j),(i+1,j-1)]
+    else:
+        if bscaled >= ihexa:
+            if cscaled >= jhexa:
+                indexes = [(i,j),(i,j+1),(i+1,j)]
+            else:
+                indexes = [(i,j),(i,j-1),(i+1,j),(i+1,j-1)]
+        else:
+            if cscaled >= jhexa:
+                indexes = [(i,j),(i-1,j),(i-1,j+1),(i,j+1)]
+            else:
+                indexes = [(i,j),(i,j-1),(i-1,j)]
+                
+                
     # Voir BuildFace0
     # localisation bottom left vertices
     icoTriangs = getIcoTriangs(modif=True)
@@ -1602,13 +1623,7 @@ def findNeightboorsHexagCenter(i,j,n=5):
         
 
 
-# In[111]:
-
-
-findNeightboorsHexagCenter(2,2)
-
-
-# In[131]:
+# In[77]:
 
 
 def findClosest(pt,pts):
@@ -1621,7 +1636,7 @@ def findClosest(pt,pts):
     return np.argmax(np.einsum('jk,kl->jl',pts,pt[:,np.newaxis]),axis=0)
 
 
-# In[136]:
+# In[88]:
 
 
 fig = plt.figure()
@@ -1639,7 +1654,7 @@ icoPoints = getIcosaedreVertices()
 face=0
 icoVertices0 = icoPoints[icoTriangs[face]]
 # ordre de la pixelization
-norder = 6
+norder = 7
 
 #Draw face 0 
 plotFaceI(k=face, ax=ax, n=norder)
@@ -1666,15 +1681,11 @@ for i in range(arr.shape[0]):
         ptOnFace = a0 * icoVertices0[0] + b0 * icoVertices0[1] + c0 * icoVertices0[2]
         #coord du pt dans le traingle spherique
         ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
-        #get a,b
+        #get a,b (in fact it is a0,b0 but this is just to be more realistic)
         a,b = getBarycentricCoordExtension(ptOnSphere,icoTriangs,vertices0,face)
-        c = 1-a-b
-        # (i,j) index
-        ihexa = int(round(norder*b))
-        jhexa = int(round(norder*c))
-        
-        #les voisins
-        centernbs = findNeightboorsHexagCenter(ihexa,jhexa,n=norder)
+#        print(a0,b0,a,b)
+        #centres des hexagones cibles
+        centernbs = findNeightboorsHexagCenter(a,b,n=norder)
         #le plus proche de ptOnSphere
         iloc = findClosest(ptOnSphere,centernbs)
         centerClosest = centernbs[iloc]
