@@ -1270,7 +1270,7 @@ def getBarycentricCoord(pt,face):
 
 # # find barycentric coordinate of a 3D pt on the sphere projected onto the corresponding icosahedron triangle
 
-# In[60]:
+# In[103]:
 
 
 def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
@@ -1279,7 +1279,10 @@ def getBarycentricCoordExtension(pt,icoTriangs,vertices,face):
         face: index of icosahedron face
         vertices: triplet of vertices of the icosahedron face
     """
-    u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
+    pt = pt.reshape(1,3)
+    print("getBarycentricC: pt shape ",pt.shape)  #(3,)
+    u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:] #(1,3)
+    print("getBarycentricC: u shape ",u.shape)
     v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
     w = pt - vertices[0][np.newaxis,:]
     # S=[u,v,OPshere]
@@ -1579,7 +1582,7 @@ def findClosest(pt,pts):
     return np.argmax(np.einsum('jk,kl->jl',pts,pt[:,np.newaxis]),axis=0)
 
 
-# In[94]:
+# In[104]:
 
 
 fig = plt.figure()
@@ -1611,8 +1614,8 @@ ax.scatter(xyzTest[0],xyzTest[1],xyzTest[2],marker='o',color='blue')
 
 
 #tirage de pts dans le triangle equilateral
-arr = np.linspace(0,1,100)
-brr = np.linspace(0,1,100)
+arr = np.linspace(0,1,10)
+brr = np.linspace(0,1,10)
 ntests = []
 for i in range(arr.shape[0]):
     a0 = arr[i]
@@ -1626,6 +1629,7 @@ for i in range(arr.shape[0]):
         #coord du pt dans le traingle spherique
         ptOnSphere = ptOnFace/np.sqrt(np.sum(ptOnFace*ptOnFace))
         #get a,b (in fact it is a0,b0 but this is just to be more realistic)
+        print(ptOnSphere.shape)
         a,b = getBarycentricCoordExtension(ptOnSphere,icoTriangs,vertices0,face)
 #        print(a0,b0,a,b)
         #centres des hexagones cibles

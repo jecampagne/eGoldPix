@@ -19,11 +19,11 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[5]:
+# In[176]:
 
 
 class egoldpix:
-    def __init__(self,n,fact=0,tol=10**(-6)):
+    def __init__(self,n=5,fact=0,tol=10**(-6)):
         '''
             n: order of the pixelization,
                 # of pixels = 10*n^2+2 
@@ -76,7 +76,8 @@ class egoldpix:
         #Get Face 0 -> Face I rotation matrix
         self.face0toIMtx = self.getFace0TofaceIMtx()
 
-        
+        #Get Face I -> Face 0 rotation matrix
+        self.faceIto0Mtx = self.getFaceIToface0Mtx()
         
     #################################################################
     def getIcosaedreVertices(self):
@@ -474,14 +475,14 @@ class egoldpix:
         theta5 = 2.*pi/5.
 
         #Face 0 is the reference 
-        icoFaceMtx[0] = rot(0.,1.,0.,0.)    # identity
+        icoFaceMtx[0] = self.rot(0.,1.,0.,0.)    # identity
 
         # Faces of the upper cap : (vertex 0 is in common)
         # -----------------------
         # face "i" is obtained from face 0 by rotation +i*(2pi/5)
         # arround axis "0"    
         for i in [1,2,3,4]:
-            icoFaceMtx[i] = rot(i*theta5, a0,b0,c0)
+            icoFaceMtx[i] = self.rot(i*theta5, a0,b0,c0)
 
         # Faces of the middle: 
         # -----------------------
@@ -491,31 +492,31 @@ class egoldpix:
 
         # Type 1
         # Face 10 is obtained face 0 by rotation -2pi/5 around axis 1
-        icoFaceMtx[10] = rot(-theta5, a1,b1,c1)
+        icoFaceMtx[10] = self.rot(-theta5, a1,b1,c1)
         # Faces [11,12,13,14] obtained from face 10 by i=1,2,3,4 rotations of 2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(i*theta5, a0,b0,c0)
+            rtmp = self.rot(i*theta5, a0,b0,c0)
             icoFaceMtx[10+i] = np.matmul(rtmp,icoFaceMtx[10]) 
 
         # Type 2
         # Face 15 is obtained face 0 by rotation -4pi/5 around axis 1
-        icoFaceMtx[15] = rot(-2*theta5, a1,b1,c1)
+        icoFaceMtx[15] = self.rot(-2*theta5, a1,b1,c1)
         # Faces [16,17,18,19] obtained from face 15 by i=1,2,3,4 rotations of 2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(i*theta5, a0,b0,c0)
+            rtmp = self.rot(i*theta5, a0,b0,c0)
             icoFaceMtx[15+i] = np.matmul(rtmp,icoFaceMtx[15]) 
 
 
         # Faces of the bottom cap (vertex 6 is in common)
         # -----------------------
         # first Face 5 is obtained from face 0 by rotation of 4pi/5 arround axis "4" 
-        icoFaceMtx[5] = rot(2*theta5, a4,b4,c4)
+        icoFaceMtx[5] = self.rot(2*theta5, a4,b4,c4)
         # then: faces [6,7,8,9] obtained from face 5 by i=1,2,3,4 rotations of +2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(i*theta5, a0,b0,c0)
+            rtmp = self.rot(i*theta5, a0,b0,c0)
             icoFaceMtx[5+i] = np.matmul(rtmp,icoFaceMtx[5]) 
 
 
@@ -551,14 +552,14 @@ class egoldpix:
         theta5 = 2.*pi/5.
 
         #Face 0 is the reference 
-        icoFaceMtx[0] = rot(0.,1.,0.,0.)    # identity
+        icoFaceMtx[0] = self.rot(0.,1.,0.,0.)    # identity
 
         # Faces of the upper cap : (vertex 0 is in common)
         # -----------------------
         # face "i" is obtained from face 0 by rotation +i*(2pi/5)
         # arround axis "0"    
         for i in [1,2,3,4]:
-            icoFaceMtx[i] = rot(-i*theta5, a0,b0,c0)
+            icoFaceMtx[i] = self.rot(-i*theta5, a0,b0,c0)
 
         # Faces of the middle: 
         # -----------------------
@@ -568,37 +569,49 @@ class egoldpix:
 
         # Type 1
         # Face 10 is obtained face 0 by rotation -2pi/5 around axis 1
-        icoFaceMtx[10] = rot(+theta5, a1,b1,c1)
+        icoFaceMtx[10] = self.rot(+theta5, a1,b1,c1)
         # Faces [11,12,13,14] obtained from face 10 by i=1,2,3,4 rotations of 2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(-i*theta5, a0,b0,c0)
+            rtmp = self.rot(-i*theta5, a0,b0,c0)
             icoFaceMtx[10+i] = np.matmul(icoFaceMtx[10],rtmp) 
 
         # Type 2
         # Face 15 is obtained face 0 by rotation -4pi/5 around axis 1
-        icoFaceMtx[15] = rot(+2*theta5, a1,b1,c1)
+        icoFaceMtx[15] = self.rot(+2*theta5, a1,b1,c1)
         # Faces [16,17,18,19] obtained from face 15 by i=1,2,3,4 rotations of 2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(-i*theta5, a0,b0,c0)
+            rtmp = self.rot(-i*theta5, a0,b0,c0)
             icoFaceMtx[15+i] = np.matmul(icoFaceMtx[15],rtmp) 
 
 
         # Faces of the bottom cap (vertex 6 is in common)
         # -----------------------
         # first Face 5 is obtained from face 0 by rotation of 4pi/5 arround axis "4" 
-        icoFaceMtx[5] = rot(-2*theta5, a4,b4,c4)
+        icoFaceMtx[5] = self.rot(-2*theta5, a4,b4,c4)
         # then: faces [6,7,8,9] obtained from face 5 by i=1,2,3,4 rotations of +2pi/5 
         # arround axe 0
         for i in [1,2,3,4]:
-            rtmp = rot(-i*theta5, a0,b0,c0)
+            rtmp = self.rot(-i*theta5, a0,b0,c0)
             icoFaceMtx[5+i] = np.matmul(icoFaceMtx[5],rtmp) 
 
 
         #done
         return icoFaceMtx
     
+    #################################################################
+    def pt2FaceId(self,pt):
+        """ 
+         find the face of a set of N points
+            use: scalaire product 
+              pt = 3xN  : (x,y,z) x N
+              (20,3) . (3,N) = (20,N)  
+              argmax axis 0 => N values
+        """
+        # test the 20 distnaces from current pt to the 20 face centers
+        return np.argmax(np.einsum('jk,kl->jl',self.icoTriangCenters,pt),axis=0)
+
     #################################################################
     def angle2FaceId(self,thetaPhi):
         """ 
@@ -613,8 +626,8 @@ class egoldpix:
         theta = thetaPhi[:,0]
         phi   = thetaPhi[:,1]
         pt = np.array([np.sin(theta)*np.cos(phi),np.sin(theta)*np.sin(phi),np.cos(theta)])
-        # test the 20 distnaces from current pt to the 20 face centers
-        return np.argmax(np.einsum('jk,kl->jl',self.icoTriangCenters,pt),axis=0)
+        return self.pt2FaceId(pt)
+        
     
     #################################################################    
     def getBarycentricCoord(self,pt,faceId):
@@ -654,7 +667,14 @@ class egoldpix:
         """
         vertices = self.icoPoints[self.icoTriangs[faceId]] 
 
+        
+        
         u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
+        
+        print("getBarycentri pt shape: ",pt.shape)
+        print("getBarycentri  u shape: ",u.shape)
+        
+        
         v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
         w = pt - vertices[0][np.newaxis,:]
         # S=[u,v,OPshere]
@@ -709,17 +729,18 @@ class egoldpix:
                     indexes = [(i,j),(i,j-1),(i-1,j)]
 
         centers = []
-
+        
         for (ic,jc) in indexes:
             ## On peut inclure les coins... en commentant les 2 lignes ci-dessous
             ##        if (ic==0 and jc==0) or (ic==0 and jc==n) or (ic==n and jc==0):
             ##            continue
 
-            center = self.getHexagoneCenter(ic,jc)
+            center = self.getHexagoneCenterOnSphere(ic,jc)
             #save
             centers.append(center)
-
-        return np.array(centers)
+            
+            
+        return np.array(centers), np.array(indexes)
 
     #################################################################    
     def findClosest(self,pt,pts):
@@ -728,9 +749,49 @@ class egoldpix:
             p: (x,y,z)
             pts : a list of (xi,yi,zi)
         """
-        return np.argmax(np.einsum('jk,kl->jl',pts,pt[:,np.newaxis]),axis=0)
+        
+        #print("findClosest, pt  shape ",pt.shape) #3,1
+        #print("findClosest, pts shape ",pts.shape) #3,3
+        
+        return np.argmax(np.einsum('jk,kl->jl',pts,pt),axis=0)
     
     
+    #################################################################    
+    def pt2pix(self,pt):
+        """
+            test
+        """
+        # determine the face Id
+        iFace = self.pt2FaceId(pt).squeeze()  #squeeze ici pour enleve 1 dim
+        # rotate the point to face 0
+        pt0 = np.dot(self.faceIto0Mtx[iFace],pt)
+        assert self.pt2FaceId(pt0)[0] == 0, "pt2pix rotation Face I->0 pb"
+        #get barycentric coord (a,b) of pt0 
+        print("pt0 shape: ",pt0.shape) # (3,1)
+        a,b = self.getBarycentricCoordExtension(pt0.T,faceId=0)
+        #centres of target tiles 
+        centernbs,indexes = self.findNeightboorsHexagCenter(a,b)
+        #find the closest one 
+        print("centernbs: ",centernbs)
+        print("indexes  : ",indexes)
+        
+        
+        iloc = self.findClosest(pt0,centernbs)
+        
+        #the closest tile: xyz, index
+        centerClosest = centernbs[iloc]
+        idxClosest    = indexes[iloc]
+        
+        print("pt0: ",pt0)
+        print("centerClosest: ",centerClosest)
+        print("idxClosest: ",idxClosest)
+        
+        
+        return iFace
+    
+    #################################################################    
+    ##
+    ## For demo
     #################################################################    
     def buildFace0(self,nmax=10):
         '''
@@ -839,6 +900,104 @@ class egoldpix:
             ax.set_ylim3d([-1,1])
             ax.set_zlim3d([-1,1])
             plt.show()
+
+
+# In[177]:
+
+
+mypix = egoldpix(n=10)
+
+
+# In[178]:
+
+
+#mypix.plotFaceI()
+
+
+# In[179]:
+
+
+# theta, phi angles of the 20 center of faces
+icoTriangCenters = mypix.icoTriangCenters
+
+
+# In[180]:
+
+
+#icoTriangCenters.shape
+
+
+# In[181]:
+
+
+#mypix.pt2FaceId(icoTriangCenters.T)
+
+
+# In[182]:
+
+
+#mypix.pt2pix(icoTriangCenters.T)
+
+
+# In[183]:
+
+
+tmppt = icoTriangCenters[2].reshape(3,1)
+
+
+# In[184]:
+
+
+mypix.pt2pix(tmppt)
+
+
+# # Avec Theta,Phi
+
+# In[ ]:
+
+
+#        theta = thetaPhi[:,0]
+#        phi   = thetaPhi[:,1]
+#        pt = np.array([np.sin(theta)*np.cos(phi),np.sin(theta)*np.sin(phi),np.cos(theta)])
+
+
+# In[25]:
+
+
+def pt3DtoSpherical(xyz):
+    norm = np.sqrt(xyz[:,0]**2 + xyz[:,1]**2 + xyz[:,2]**2)
+    theta = np.arccos(xyz[:,2]/norm)
+    phi = np.arctan2(xyz[:,1], xyz[:,0])
+    mask = phi<0
+    phi[mask]+=2*pi
+    return np.array([theta,phi]).T
+
+
+# In[26]:
+
+
+# theta, phi angles of the 20 center of faces
+icoTriangCenters = mypix.icoTriangCenters
+angleicoTriangCenters= pt3DtoSpherical(icoTriangCenters)
+
+
+# In[27]:
+
+
+angleicoTriangCenters
+
+
+# In[28]:
+
+
+mypix.angle2FaceId(angleicoTriangCenters)
+
+
+# In[72]:
+
+
+a=np.array([1]).squeeze()
+print(mypix.faceIto0Mtx[a].shape)
 
 
 # In[ ]:
