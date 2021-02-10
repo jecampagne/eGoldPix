@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[176]:
+# In[287]:
 
 
 class egoldpix:
@@ -79,6 +79,118 @@ class egoldpix:
         #Get Face I -> Face 0 rotation matrix
         self.faceIto0Mtx = self.getFaceIToface0Mtx()
         
+    #################################################################    
+    ##
+    ## For demo
+    #################################################################    
+    def buildFace0(self,nmax=10):
+        '''
+            For demo only, order of the pixelization should be low <=10
+            build face 0
+            order of the pixelization
+        '''
+        assert self.n<=nmax, "for demo only: order of pixelisation <= "+str(nmax)
+        
+        n=self.n
+        
+        faces   = []
+        centers = []
+        types   = []
+        indexes = []
+
+        for i in range(n+1):
+            for j in range(n-i+1):
+                opt, th = self.getHexInfos(i,j)
+                #exclude the hexagons at the vertices of the isocele triangle
+                if (i!=0 or j!=0) and (i!=0 or j!=n) and (i!=n or j!=0):
+                    hexagcenter = self.getHexagoneCenterOnFace(i,j)
+                    hexag = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
+                    a = self.icoTriangs0[0]
+                    b = self.icoTriangs0[1] 
+                    c = self.icoTriangs0[2] 
+                    face   = self.getProjectedFace(hexag,a,b,c)
+                    #ici on refait a la main getHexagoneCenterOnSphere
+                    center = self.getProjectedPt(hexagcenter,a,b,c)
+
+                    faces.append(face)
+                    centers.append(center)
+                    indexes.append((0,i,j))
+                    types.append(opt)
+
+        return faces, centers, indexes, types
+    
+    #################################################################    
+    def plotFaceI(self, k=0, ax=None,nmax=10):
+        '''
+            For demo only, order of the pixelization should be low <=10
+            
+            plot the different tiles of a Icosahedron face
+            k : index of Icosahedron face
+            
+            use Face 0 and rotations
+        '''
+        assert self.n<=nmax, "for demo only: order of pixelisation <= "+str(nmax)
+
+        #Get tiles of Face 0
+        faces0, centers0, indexes0, types0 = self.buildFace0()
+        collectFaces0 = np.hstack(faces0)  #collect all tiles of face 0
+        centers0 = np.array(centers0)
+
+
+        #Get Face 0 -> Face k rotation matrix
+        faceMtx = self.face0toIMtx
+
+        if ax is None:
+            fig = plt.figure()
+            ax = Axes3D(fig)
+            ax.set_xlabel(r'$X$', fontsize=20)
+            ax.set_ylabel(r'$Y$', fontsize=20)
+            ax.set_zlabel(r'$Z$', fontsize=20)  
+
+        nIcofaces =  self.nIsofaces
+        colors = cm.rainbow(np.linspace(0, 1, nIcofaces))
+
+        #number of tiles per face wrt the order n
+        nTiles = len(faces0) # (n+1)(n+2)/2 - 3
+
+        centerfAll = np.einsum('jk,kl->jl', faceMtx[k],centers0.T).T
+
+        #transform tuple to list
+        idxfAll  = np.array(indexes0)
+        typesAll = np.array(types0)
+
+
+        # change first element of each index by the face identifier
+        idxfAll[:,0] = k
+        idxfAll = [tuple(x) for x in idxfAll.tolist()]
+
+        for i in range(nTiles):
+            vertices=np.einsum('jk,kl->jl', faceMtx[k],faces0[i])
+            vertsf  = vertices.T
+            centerf = centerfAll[i]
+            idxf  = idxfAll[i]
+            typef = typesAll[i]
+        #    print("vertsf:  ", vertsf.shape)
+
+            xf,yf,zf = vertsf[:,0],vertsf[:,1],vertsf[:,2]
+
+
+            ax.scatter(centerf[0],centerf[1],centerf[2],marker='x',s=10,color='k')
+            ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
+                                                 facecolors = colors[k], 
+                                                 edgecolors='k', 
+                                                 linewidths=1, alpha=0.5))
+            ax.text(centerf[0]*1.01,centerf[1]*1.01,centerf[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),size=10, zorder=1, color='k')
+
+        if ax is None:
+            ax.set_xlabel(r'$X$', fontsize=20)
+            ax.set_ylabel(r'$Y$', fontsize=20)
+            ax.set_zlabel(r'$Z$', fontsize=20)
+            ax.set_xlim3d([-1,1])
+            ax.set_ylim3d([-1,1])
+            ax.set_zlim3d([-1,1])
+            plt.show()
+
     #################################################################
     def getIcosaedreVertices(self):
         """
@@ -759,196 +871,140 @@ class egoldpix:
     #################################################################    
     def pt2pix(self,pt):
         """
-            test
+            test pt -> pixel identifier 
+            input : pt (x,y,z)
+            output: faceId, (i,j)-face0
         """
         # determine the face Id
-        iFace = self.pt2FaceId(pt).squeeze()  #squeeze ici pour enleve 1 dim
+        iFace = self.pt2FaceId(pt)[0]  # Todo  vectorization
         # rotate the point to face 0
         pt0 = np.dot(self.faceIto0Mtx[iFace],pt)
         assert self.pt2FaceId(pt0)[0] == 0, "pt2pix rotation Face I->0 pb"
         #get barycentric coord (a,b) of pt0 
-        print("pt0 shape: ",pt0.shape) # (3,1)
+        # print("pt0 shape: ",pt0.shape) # (3,1)
         a,b = self.getBarycentricCoordExtension(pt0.T,faceId=0)
         #centres of target tiles 
         centernbs,indexes = self.findNeightboorsHexagCenter(a,b)
         #find the closest one 
-        print("centernbs: ",centernbs)
-        print("indexes  : ",indexes)
+        iloc = self.findClosest(pt0,centernbs)[0]  # Todo vectorization
         
-        
-        iloc = self.findClosest(pt0,centernbs)
-        
-        #the closest tile: xyz, index
-        centerClosest = centernbs[iloc]
+        #the closest tile index
         idxClosest    = indexes[iloc]
+
+        # juste pour le debug ici car on ne veut que l'index
+        #        centerClosest = centernbs[iloc]         
+        #        print("pt0: ",pt0)
+        #        print("centerClosest: ",centerClosest)
+        #        print("idxClosest: ",idxClosest)
         
-        print("pt0: ",pt0)
-        print("centerClosest: ",centerClosest)
-        print("idxClosest: ",idxClosest)
-        
-        
-        return iFace
+        return iFace, idxClosest
     
     #################################################################    
-    ##
-    ## For demo
+    def pix2pt(self,iFace,ijdx):
+        """
+          from face index and (i,j)-index on face 0 retreive the tile center
+          input: 
+              iFace: on of the 20 faces of the icosahedron
+              ijdx: (i,j)-index of the tile on face 0 
+        """
+        #find center of the tile on Face 0 
+        center0 = self.getHexagoneCenterOnSphere(ijdx[0],ijdx[1])
+        #Rotate from Face0 to Face faceId
+        center = np.dot(self.face0toIMtx[iFace],center0)
+        return center
+
     #################################################################    
-    def buildFace0(self,nmax=10):
-        '''
-            For demo only, order of the pixelization should be low <=10
-            build face 0
-            order of the pixelization
-        '''
-        assert self.n<=nmax, "for demo only: order of pixelisation <= "+str(nmax)
-        
-        n=self.n
-        
-        faces   = []
-        centers = []
-        types   = []
-        indexes = []
-
-        for i in range(n+1):
-            for j in range(n-i+1):
-                opt, th = self.getHexInfos(i,j)
-                #exclude the hexagons at the vertices of the isocele triangle
-                if (i!=0 or j!=0) and (i!=0 or j!=n) and (i!=n or j!=0):
-                    hexagcenter = self.getHexagoneCenterOnFace(i,j)
-                    hexag = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
-                    a = self.icoTriangs0[0]
-                    b = self.icoTriangs0[1] 
-                    c = self.icoTriangs0[2] 
-                    face   = self.getProjectedFace(hexag,a,b,c)
-                    #ici on refait a la main getHexagoneCenterOnSphere
-                    center = self.getProjectedPt(hexagcenter,a,b,c)
-
-                    faces.append(face)
-                    centers.append(center)
-                    indexes.append((0,i,j))
-                    types.append(opt)
-
-        return faces, centers, indexes, types
-    
-    #################################################################    
-    def plotFaceI(self, k=0, ax=None,nmax=10):
-        '''
-            For demo only, order of the pixelization should be low <=10
+    def pix2TileVertices(self,iFace,ijdx):
+        """
+          from face index and (i,j)-index on face 0 retreive the tile vertices
+          input: 
+              iFace: on of the 20 faces of the icosahedron
+              ijdx: (i,j)-index of the tile on face 0 
+        """
+        #Get the tile vertices on Face 0
+        i = ijdx[0]
+        j = ijdx[1]
+        #get shape option and orientation of the tile
+        opt, th = self.getHexInfos(i,j)
+        #coordinates of the tile center on Face 0 frame
+        hexagcenter = self.getHexagoneCenterOnFace(i,j)
+        #the vertices coordinates on Face 0 frame
+        verticesOnFace  = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
+        #the vertices coordinates projected on Sphere (Face 0)
+        verticesOnSphere= self.getProjectedFace(verticesOnFace,
+                                            self.icoTriangs0[0],
+                                            self.icoTriangs0[1],
+                                            self.icoTriangs0[2])
+        print("Mtx: shape ",self.face0toIMtx[iFace].shape)
+        print("verticesOnSphere: shape ",verticesOnSphere.shape)
             
-            plot the different tiles of a Icosahedron face
-            k : index of Icosahedron face
-            
-            use Face 0 and rotations
-        '''
-        assert self.n<=nmax, "for demo only: order of pixelisation <= "+str(nmax)
-
-        #Get tiles of Face 0
-        faces0, centers0, indexes0, types0 = self.buildFace0()
-        collectFaces0 = np.hstack(faces0)  #collect all tiles of face 0
-        centers0 = np.array(centers0)
 
 
-        #Get Face 0 -> Face k rotation matrix
-        faceMtx = self.face0toIMtx
-
-        if ax is None:
-            fig = plt.figure()
-            ax = Axes3D(fig)
-            ax.set_xlabel(r'$X$', fontsize=20)
-            ax.set_ylabel(r'$Y$', fontsize=20)
-            ax.set_zlabel(r'$Z$', fontsize=20)  
-
-        nIcofaces =  self.nIsofaces
-        colors = cm.rainbow(np.linspace(0, 1, nIcofaces))
-
-        #number of tiles per face wrt the order n
-        nTiles = len(faces0) # (n+1)(n+2)/2 - 3
-
-        centerfAll = np.einsum('jk,kl->jl', faceMtx[k],centers0.T).T
-
-        #transform tuple to list
-        idxfAll  = np.array(indexes0)
-        typesAll = np.array(types0)
-
-
-        # change first element of each index by the face identifier
-        idxfAll[:,0] = k
-        idxfAll = [tuple(x) for x in idxfAll.tolist()]
-
-        for i in range(nTiles):
-            vertices=np.einsum('jk,kl->jl', faceMtx[k],faces0[i])
-            vertsf  = vertices.T
-            centerf = centerfAll[i]
-            idxf  = idxfAll[i]
-            typef = typesAll[i]
-        #    print("vertsf:  ", vertsf.shape)
-
-            xf,yf,zf = vertsf[:,0],vertsf[:,1],vertsf[:,2]
-
-
-            ax.scatter(centerf[0],centerf[1],centerf[2],marker='x',s=10,color='k')
-            ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
-                                                 facecolors = colors[k], 
-                                                 edgecolors='k', 
-                                                 linewidths=1, alpha=0.5))
-            ax.text(centerf[0]*1.01,centerf[1]*1.01,centerf[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),size=10, zorder=1, color='k')
-
-        if ax is None:
-            ax.set_xlabel(r'$X$', fontsize=20)
-            ax.set_ylabel(r'$Y$', fontsize=20)
-            ax.set_zlabel(r'$Z$', fontsize=20)
-            ax.set_xlim3d([-1,1])
-            ax.set_ylim3d([-1,1])
-            ax.set_zlim3d([-1,1])
-            plt.show()
-
-
-# In[177]:
+# In[289]:
 
 
 mypix = egoldpix(n=10)
 
 
-# In[178]:
+# In[290]:
 
 
 #mypix.plotFaceI()
 
 
-# In[179]:
+# In[291]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[180]:
+# In[292]:
 
 
 #icoTriangCenters.shape
 
 
-# In[181]:
+# In[293]:
 
 
 #mypix.pt2FaceId(icoTriangCenters.T)
 
 
-# In[182]:
+# In[294]:
 
 
 #mypix.pt2pix(icoTriangCenters.T)
 
 
-# In[183]:
+# In[295]:
 
 
 tmppt = icoTriangCenters[2].reshape(3,1)
 
 
-# In[184]:
+# In[296]:
 
 
-mypix.pt2pix(tmppt)
+#tmppt = np.array([-0.62321876, -0.03638397,  0.78120073]).reshape(3,1)
+
+
+# In[297]:
+
+
+iFace, ijdx = mypix.pt2pix(tmppt)
+
+
+# In[298]:
+
+
+mypix.pix2pt(iFace, ijdx)
+
+
+# In[299]:
+
+
+mypix.pix2TileVertices(iFace, ijdx)
 
 
 # # Avec Theta,Phi
