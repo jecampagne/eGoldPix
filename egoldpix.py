@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[287]:
+# In[558]:
 
 
 class egoldpix:
@@ -909,10 +909,69 @@ class egoldpix:
         """
         #find center of the tile on Face 0 
         center0 = self.getHexagoneCenterOnSphere(ijdx[0],ijdx[1])
-        #Rotate from Face0 to Face faceId
+        #Rotate from Face0 to Face iFace
         center = np.dot(self.face0toIMtx[iFace],center0)
         return center
 
+    #################################################################
+    def hexagonV2(self,x,y,th,opt):
+        '''
+            Modified version of hexagon method but particularized for Face 0
+            
+        '''
+        
+        fact = self.fact
+        
+        # rotation matrx with scale (th>0 the transformation is anti-clockwise)
+        rot_mat = self.scale * np.array([[np.cos(th), -np.sin(th)],
+                                        [np.sin(th), np.cos(th)]])
+        if opt == 1:
+            '''
+                Hexagone complet
+                                       Y
+                      0                ^
+                1           5          I
+                                       I--- > X
+                2           4
+                      3     
+            ''' 
+            hex = np.zeros((2,6))
+            hex[0,:]= np.array([np.sin(i*np.pi/3) for i in range(6)]) # X-coord
+            hex[1,:]= np.array([np.cos(i*np.pi/3) for i in range(6)]) # Y-coord
+
+        elif opt == 2:
+            '''
+                Hexagone tronque
+
+                        2               ^
+                 3             1         I
+                                         I
+                 4             0         I--- >
+                 mais on supprime les points 0 et 4 dont y=0
+            ''' 
+            hex = np.zeros((2,3))
+            hex[0,:]= np.array([sqrt(3)/2,0,-sqrt(3)/2]) # X-ccod
+            hex[1,:]= np.array([0.5,1,0.5]) # Y-coord
+
+        elif opt == 3:
+            # point 0 et 1 sont modifiers par rapport au type 2
+            hex = np.zeros((2,5))
+            hex[0,:]= np.array([sqrt(3)/2-fact,sqrt(3)/2-fact,0,-sqrt(3)/2,-sqrt(3)/2]) # X-ccod
+            hex[1,:]= np.array([0,1/2+fact/sqrt(3),1,0.5,0]) # Y-coord
+
+        elif opt == 4:
+            # point 3 et 4 sont modifiers par rapport au type 2
+            hex = np.zeros((2,5))
+            hex[0,:]= np.array([sqrt(3)/2,sqrt(3)/2,0,-sqrt(3)/2+fact,-sqrt(3)/2+fact]) # X-ccod
+            hex[1,:]= np.array([0,0.5,1,1/2+fact/sqrt(3),0]) # Y-coord
+
+
+        hex = np.matmul(rot_mat,hex)
+
+        hex[0,:]= x+hex[0,:] 
+        hex[1,:]= y+hex[1,:]
+
+        return hex
     #################################################################    
     def pix2TileVertices(self,iFace,ijdx):
         """
@@ -922,89 +981,213 @@ class egoldpix:
               ijdx: (i,j)-index of the tile on face 0 
         """
         #Get the tile vertices on Face 0
-        i = ijdx[0]
-        j = ijdx[1]
+        i0 = ijdx[0]
+        j0 = ijdx[1]
+        print("i0,j0: ",i0,j0)
         #get shape option and orientation of the tile
-        opt, th = self.getHexInfos(i,j)
+        opt, th = self.getHexInfos(i0,j0)
         #coordinates of the tile center on Face 0 frame
-        hexagcenter = self.getHexagoneCenterOnFace(i,j)
+        hexagcenter = self.getHexagoneCenterOnFace(i0,j0)
         #the vertices coordinates on Face 0 frame
-        verticesOnFace  = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
+        ######        verticesOnFace  = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
+        verticesOnFace  = self.hexagonV2(hexagcenter[0],hexagcenter[1],th,opt)
         #the vertices coordinates projected on Sphere (Face 0)
-        verticesOnSphere= self.getProjectedFace(verticesOnFace,
+        verticesOnSphere0= self.getProjectedFace(verticesOnFace,
                                             self.icoTriangs0[0],
                                             self.icoTriangs0[1],
                                             self.icoTriangs0[2])
-        print("Mtx: shape ",self.face0toIMtx[iFace].shape)
-        print("verticesOnSphere: shape ",verticesOnSphere.shape)
-            
+        
+        if j0==0:
+            #tile edge between Face 0 and Face 4
+            # index correspondance (0,i0,0) <-> (4,0,i0)
+            i4 = 0
+            j4 = i0
+            opt4, th4 = self.getHexInfos(i4,j4)
+            hexagcenter4 = self.getHexagoneCenterOnFace(i4,j4)
+            verticesOnFace4 = self.hexagonV2(hexagcenter4[0],hexagcenter4[1],th4,opt4)            
+            verticesOnSphere4= self.getProjectedFace(verticesOnFace4,
+                                            self.icoTriangs[4][0],
+                                            self.icoTriangs[4][1],
+                                            self.icoTriangs[4][2])
+
+            #merge vertices on Face 0 with vertices on Face 4
+            verticesOnSphere0 = np.hstack((verticesOnSphere0,verticesOnSphere4))
+
+        elif i0==0:
+            #tile edge between Face 0 and Face 1
+            # index correspondance (0,0,j0) <-> (1,j0,0)
+            i1 = j0
+            j1 = 0
+            opt1, th1 = self.getHexInfos(i1,j1)
+            hexagcenter1 = self.getHexagoneCenterOnFace(i1,j1)
+            verticesOnFace1 = self.hexagonV2(hexagcenter1[0],hexagcenter1[1],th1,opt1)            
+            verticesOnSphere1= self.getProjectedFace(verticesOnFace1,
+                                            self.icoTriangs[1][0],
+                                            self.icoTriangs[1][1],
+                                            self.icoTriangs[1][2])
+
+            #merge vertices on Face 0 with vertices on Face 1
+            verticesOnSphere0 = np.hstack((verticesOnSphere0,verticesOnSphere1))
+   
+        elif i0+j0==self.n:
+            print("i0+j0=n")
+            #tile edge between Face 0 and Face 10
+            # index correspondance (0,i0,j0) avec i0+j0=n <-> (10,i0,0)
+            i10 = i0
+            j10 = 0
+            opt10, th10 = self.getHexInfos(i10,j10)
+            hexagcenter10 = self.getHexagoneCenterOnFace(i10,j10)
+            verticesOnFace10 = self.hexagonV2(hexagcenter10[0],hexagcenter10[1],th10,opt10)            
+            verticesOnSphere10= self.getProjectedFace(verticesOnFace10,
+                                            self.icoTriangs[10][0],
+                                            self.icoTriangs[10][1],
+                                            self.icoTriangs[10][2])
+
+            #merge vertices on Face 0 with vertices on Face 1
+            verticesOnSphere0 = np.hstack((verticesOnSphere0,verticesOnSphere10))
+   
+        
+        
+        #Rotate from Face 0 to Face iFace
+        verticesOnSphere = np.dot(self.face0toIMtx[iFace],verticesOnSphere0)
+        
+        return verticesOnSphere
 
 
-# In[289]:
+# In[559]:
 
 
-mypix = egoldpix(n=10)
+mypix = egoldpix(n=6)
 
 
-# In[290]:
-
-
-#mypix.plotFaceI()
-
-
-# In[291]:
+# In[560]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[292]:
+# In[561]:
 
 
-#icoTriangCenters.shape
+#test face 8 center tmppt = icoTriangCenters[8].reshape(3,1)
 
 
-# In[293]:
+# In[562]:
 
 
-#mypix.pt2FaceId(icoTriangCenters.T)
+#point entre face 0 et 4 du cote 0
+#tmppt1 = icoTriangCenters[0].reshape(3,1)
+#tmppt2 = icoTriangCenters[4].reshape(3,1)
+#tmppt = 0.5*(tmppt1+tmppt2)
+#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+#mtx = mypix.rot((2.*pi/5.)/30, 0,0,1)
+#tmppt = np.dot(mtx,tmppt)
 
 
-# In[294]:
+# In[563]:
 
 
-#mypix.pt2pix(icoTriangCenters.T)
+#point entre face 0 et 1 du cote 0
+#tmppt1 = icoTriangCenters[0].reshape(3,1)
+#tmppt2 = icoTriangCenters[1].reshape(3,1)
+#tmppt = 0.5*(tmppt1+tmppt2)
+#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+#mtx = mypix.rot((-2.*pi/5.)/30, 0,0,1)
+#tmppt = np.dot(mtx,tmppt)
 
 
-# In[295]:
+# In[564]:
 
 
-tmppt = icoTriangCenters[2].reshape(3,1)
+#point entre face 0 et 10 du cote 0
+tmppt1 = icoTriangCenters[0].reshape(3,1)
+tmppt2 = icoTriangCenters[10].reshape(3,1)
+tmppt = 0.5*(tmppt1+tmppt2)
+tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+goldphi = (1.+sqrt(5.))/2.  # golden ratio (x^2=x+1)
+goldphi2 = goldphi * goldphi 
+c1 = goldphi/(1.+goldphi2)
+a1 = 2.*c1
+b1 = 0.
+mtx = mypix.rot((2.*pi/5.)/30, a1,b1,c1)
+tmppt = np.dot(mtx,tmppt)
 
 
-# In[296]:
-
-
-#tmppt = np.array([-0.62321876, -0.03638397,  0.78120073]).reshape(3,1)
-
-
-# In[297]:
+# In[565]:
 
 
 iFace, ijdx = mypix.pt2pix(tmppt)
 
 
-# In[298]:
+# In[566]:
 
 
-mypix.pix2pt(iFace, ijdx)
+center = mypix.pix2pt(iFace, ijdx)
 
 
-# In[299]:
+# In[567]:
 
 
-mypix.pix2TileVertices(iFace, ijdx)
+vertices = mypix.pix2TileVertices(iFace, ijdx)
+
+
+# In[ ]:
+
+
+
+
+
+# In[568]:
+
+
+zoom=False
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)  
+
+colors = cm.rainbow(np.linspace(0, 1, mypix.nIsofaces))
+
+ax.scatter(tmppt[0],tmppt[1],tmppt[2],marker='o',s=10,color='blue')
+
+
+ax.scatter(center[0],center[1],center[2],marker='x',s=10,color='k')
+xf,yf,zf = vertices[0,:],vertices[1,:],vertices[2,:]
+ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
+                    facecolors = colors[iFace], 
+                    edgecolors='k', 
+                    linewidths=1, alpha=0.5))
+
+idxf = (iFace, ijdx[0],ijdx[1])
+ax.text(center[0]*1.01,
+        center[1]*1.01,
+        center[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),
+        size=10, zorder=1, color='k')
+
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)
+if zoom:
+    ax.set_xlim3d([np.min(vertices[0,:]),np.max(vertices[0,:])])
+    ax.set_ylim3d([np.min(vertices[1,:]),np.max(vertices[1,:])])
+    ax.set_zlim3d([np.min(vertices[2,:]),np.max(vertices[2,:])])
+else:
+    ax.set_xlim3d([-1,1])
+    ax.set_ylim3d([-1,1])
+    ax.set_zlim3d([-1,1])
+    
+plt.show()
+
+
+# In[526]:
+
+
+#mypix.plotFaceI(k=0)
+#mypix.plotFaceI(k=4)
+#mypix.plotFaceI(k=1)
+mypix.plotFaceI(k=10)
 
 
 # # Avec Theta,Phi

@@ -449,7 +449,7 @@ plot_icoVertices()
 import seaborn as sns
 
 
-# In[16]:
+# In[105]:
 
 
 def icoTriangsConfig(modif=False):
@@ -501,7 +501,7 @@ def icoTriangsConfig(modif=False):
 #icoTriangsConfig()
 
 
-# In[18]:
+# In[107]:
 
 
 #mofdified versipn
