@@ -892,7 +892,7 @@ def plotFaceI(k=0, ax=None, n=5):
 #faces0, centers0, indexes0, types0 = buildFace0()
 
 
-# In[29]:
+# In[108]:
 
 
 plotFaceI(k=0)

@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[558]:
+# In[769]:
 
 
 class egoldpix:
@@ -78,6 +78,9 @@ class egoldpix:
 
         #Get Face I -> Face 0 rotation matrix
         self.faceIto0Mtx = self.getFaceIToface0Mtx()
+        
+        #Get Face neighbors array to solve tile index ambiguity
+        self.faceNeighbors = self.getFaceNeighbors()
         
     #################################################################    
     ##
@@ -243,37 +246,64 @@ class egoldpix:
             order : (0,1,2) for face 0 and then following some rotations
                 we get the triplet for each face
         """
-        nfaces =  self.nIsofaces
-        icoTriangs = np.zeros((nfaces,3),dtype=int)
-        if modif:
-            icoTriangs[0] = np.array([0,1,2])
-            icoTriangs[1] = np.array([0,2,3])
-            icoTriangs[2] = np.array([0,3,4])
-            icoTriangs[3] = np.array([0,4,5])
-            icoTriangs[4] = np.array([0,5,1])
-            #JEC change 12/1/21 poour bottom cap evolue clockwise 
-            icoTriangs[5] = np.array([7,8,6])
-            icoTriangs[6] = np.array([11,7,6])
-            icoTriangs[7] = np.array([10,11,6])
-            icoTriangs[8] = np.array([9,10,6])
-            icoTriangs[9] = np.array([8,9,6])
-            #
-            icoTriangs[10]= np.array([2,1,9])
-            icoTriangs[11]= np.array([3,2,8])
-            icoTriangs[12]= np.array([4,3,7])
-            icoTriangs[13]= np.array([5,4,11])
-            icoTriangs[14]= np.array([1,5,10])
-            #
-            icoTriangs[15]= np.array([9,1,10])
-            icoTriangs[16]= np.array([8,2,9])
-            icoTriangs[17]= np.array([7,3,8])
-            icoTriangs[18]= np.array([11,4,7])
-            icoTriangs[19]= np.array([10,5,11])
-        else:
-            icoTriangs = [(0,i+1,(i+1)%5+1) for i in range(5)] +                 [(6,i+7,(i+1)%5+7) for i in range(5)] +                 [(i+1,(i+1)%5+1,(7-i)%5+7) for i in range(5)] +                 [(i+1,(7-i)%5+7,(8-i)%5+7) for i in range(5)]
-            icoTriangs=np.array(icoTriangs)
+        icoTriangs = np.zeros((self.nIsofaces,3),dtype=int)
+        icoTriangs[0] = np.array([0,1,2])
+        icoTriangs[1] = np.array([0,2,3])
+        icoTriangs[2] = np.array([0,3,4])
+        icoTriangs[3] = np.array([0,4,5])
+        icoTriangs[4] = np.array([0,5,1])
+        #JEC change 12/1/21 poour bottom cap evolue clockwise 
+        icoTriangs[5] = np.array([7,8,6])
+        icoTriangs[6] = np.array([11,7,6])
+        icoTriangs[7] = np.array([10,11,6])
+        icoTriangs[8] = np.array([9,10,6])
+        icoTriangs[9] = np.array([8,9,6])
+        #
+        icoTriangs[10]= np.array([2,1,9])
+        icoTriangs[11]= np.array([3,2,8])
+        icoTriangs[12]= np.array([4,3,7])
+        icoTriangs[13]= np.array([5,4,11])
+        icoTriangs[14]= np.array([1,5,10])
+        #
+        icoTriangs[15]= np.array([9,1,10])
+        icoTriangs[16]= np.array([8,2,9])
+        icoTriangs[17]= np.array([7,3,8])
+        icoTriangs[18]= np.array([11,4,7])
+        icoTriangs[19]= np.array([10,5,11])
 
         return icoTriangs
+    #################################################################
+    def getFaceNeighbors(self):
+        """
+            Set icosahedron face neighbors: bottom, left, right
+            according to face orientation given by getIcoTriangs 
+        """
+        nbarr = np.zeros((self.nIsofaces,),dtype=np.int)
+        #up cap
+        nbarr[0] = [10,4,1]
+        nbarr[1] = [11,0,2]
+        nbarr[2] = [12,1,3]
+        nbarr[3] = [13,2,4]
+        nbarr[4] = [14,3,5]
+        #bottom cap
+        nbarr[5] = [9,17,6]
+        nbarr[6] = [5,18,7]
+        nbarr[7] = [6,19,8]
+        nbarr[8] = [7,15,9]
+        nbarr[9] = [8,16,5]
+        # v isocele triangle central band
+        nbarr[10] = [15,0,16]
+        nbarr[11] = [16,1,17]
+        nbarr[12] = [17,2,18]
+        nbarr[13] = [18,3,19]
+        nbarr[14] = [19,4,15]
+        # ^ isocele triangle central band
+        nbarr[15] = [14,10,8]
+        nbarr[16] = [10,11,9]
+        nbarr[17] = [11,12,5]
+        nbarr[18] = [12,13,6]
+        nbarr[19] = [13,14,7]
+        return nbarr
 
     #################################################################
     def getIcoTriangCenters(self):
@@ -472,7 +502,8 @@ class egoldpix:
     #################################################################
     def hexagon(self,x,y,th,opt):
         '''
-            this program creates the hexagon of given configuration and size.
+            Version for drawning only hexagon of given configuration and size.
+            see hexagonV2
             inputs: 
                 - x and y are the rectangular coordinates of the center of the hexagon
                 - th is the rotation angle measured anticlockwise positive 
@@ -824,6 +855,8 @@ class egoldpix:
         # (i,j) index target    
         i = int(round(bscaled))
         j = int(round(cscaled))
+        
+        print("findNeightboorsHexagCenter; i,j target: ",i,j)
 
         #Choose indexes of the hexagones to test for closest approach
         if full:
@@ -841,12 +874,10 @@ class egoldpix:
                     indexes = [(i,j),(i,j-1),(i-1,j)]
 
         centers = []
-        
+        print("findNeightboorsHexagCenter; indexes: ",indexes)
         for (ic,jc) in indexes:
-            ## On peut inclure les coins... en commentant les 2 lignes ci-dessous
-            ##        if (ic==0 and jc==0) or (ic==0 and jc==n) or (ic==n and jc==0):
-            ##            continue
-
+            if ic+jc > self.n: continue
+            
             center = self.getHexagoneCenterOnSphere(ic,jc)
             #save
             centers.append(center)
@@ -879,12 +910,15 @@ class egoldpix:
         iFace = self.pt2FaceId(pt)[0]  # Todo  vectorization
         # rotate the point to face 0
         pt0 = np.dot(self.faceIto0Mtx[iFace],pt)
-        assert self.pt2FaceId(pt0)[0] == 0, "pt2pix rotation Face I->0 pb"
+        #####Pas necessaire et peut produire une exception a cause d'arrondis
+        ######assert self.pt2FaceId(pt0)[0] == 0, "pt2pix rotation Face I->0 pb"+str(self.pt2FaceId(pt0)[0])
         #get barycentric coord (a,b) of pt0 
         # print("pt0 shape: ",pt0.shape) # (3,1)
         a,b = self.getBarycentricCoordExtension(pt0.T,faceId=0)
         #centres of target tiles 
         centernbs,indexes = self.findNeightboorsHexagCenter(a,b)
+        print("pt2pix: centernbs: ", centernbs)
+        print("pt2pix: indexes: ", indexes)
         #find the closest one 
         iloc = self.findClosest(pt0,centernbs)[0]  # Todo vectorization
         
@@ -956,14 +990,14 @@ class egoldpix:
         elif opt == 3:
             # point 0 et 1 sont modifiers par rapport au type 2
             hex = np.zeros((2,5))
-            hex[0,:]= np.array([sqrt(3)/2-fact,sqrt(3)/2-fact,0,-sqrt(3)/2,-sqrt(3)/2]) # X-ccod
-            hex[1,:]= np.array([0,1/2+fact/sqrt(3),1,0.5,0]) # Y-coord
+            hex[0,:]= np.array([sqrt(3)/2-fact,0,-sqrt(3)/2]) # X-ccod
+            hex[1,:]= np.array([1/2+fact/sqrt(3),1,0.5]) # Y-coord
 
         elif opt == 4:
             # point 3 et 4 sont modifiers par rapport au type 2
             hex = np.zeros((2,5))
-            hex[0,:]= np.array([sqrt(3)/2,sqrt(3)/2,0,-sqrt(3)/2+fact,-sqrt(3)/2+fact]) # X-ccod
-            hex[1,:]= np.array([0,0.5,1,1/2+fact/sqrt(3),0]) # Y-coord
+            hex[0,:]= np.array([sqrt(3)/2,0,-sqrt(3)/2+fact]) # X-ccod
+            hex[1,:]= np.array([0.5,1,1/2+fact/sqrt(3)]) # Y-coord
 
 
         hex = np.matmul(rot_mat,hex)
@@ -988,8 +1022,6 @@ class egoldpix:
         opt, th = self.getHexInfos(i0,j0)
         #coordinates of the tile center on Face 0 frame
         hexagcenter = self.getHexagoneCenterOnFace(i0,j0)
-        #the vertices coordinates on Face 0 frame
-        ######        verticesOnFace  = self.hexagon(hexagcenter[0],hexagcenter[1],th,opt)
         verticesOnFace  = self.hexagonV2(hexagcenter[0],hexagcenter[1],th,opt)
         #the vertices coordinates projected on Sphere (Face 0)
         verticesOnSphere0= self.getProjectedFace(verticesOnFace,
@@ -997,7 +1029,19 @@ class egoldpix:
                                             self.icoTriangs0[1],
                                             self.icoTriangs0[2])
         
-        if j0==0:
+        if i0==0 and j0==0:
+            #top pentagon
+            print("top penta not yet implemented")
+
+        elif i0==self.n and j0==0:
+            #bottom left
+            print("bottom left penta not yet implemented")
+
+        elif i0==0 and j0==self.n:
+            #bottom right
+            print("bottom right penta not yet implemented")
+            
+        elif j0==0 and (i0 != 0 or i0 != self.n):
             #tile edge between Face 0 and Face 4
             # index correspondance (0,i0,0) <-> (4,0,i0)
             i4 = 0
@@ -1013,7 +1057,7 @@ class egoldpix:
             #merge vertices on Face 0 with vertices on Face 4
             verticesOnSphere0 = np.hstack((verticesOnSphere0,verticesOnSphere4))
 
-        elif i0==0:
+        elif i0==0 and j0 != self.n:
             #tile edge between Face 0 and Face 1
             # index correspondance (0,0,j0) <-> (1,j0,0)
             i1 = j0
@@ -1030,7 +1074,6 @@ class egoldpix:
             verticesOnSphere0 = np.hstack((verticesOnSphere0,verticesOnSphere1))
    
         elif i0+j0==self.n:
-            print("i0+j0=n")
             #tile edge between Face 0 and Face 10
             # index correspondance (0,i0,j0) avec i0+j0=n <-> (10,i0,0)
             i10 = i0
@@ -1054,26 +1097,34 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[559]:
+# In[764]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[560]:
+# In[722]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[561]:
+# In[723]:
 
 
-#test face 8 center tmppt = icoTriangCenters[8].reshape(3,1)
+#test face 12 center 
+#tmppt = icoTriangCenters[12].reshape(3,1)
 
 
-# In[562]:
+# In[724]:
+
+
+#test face 6 center 
+#tmppt = icoTriangCenters[6].reshape(3,1)
+
+
+# In[725]:
 
 
 #point entre face 0 et 4 du cote 0
@@ -1085,7 +1136,7 @@ icoTriangCenters = mypix.icoTriangCenters
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[563]:
+# In[726]:
 
 
 #point entre face 0 et 1 du cote 0
@@ -1097,48 +1148,98 @@ icoTriangCenters = mypix.icoTriangCenters
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[564]:
+# In[727]:
 
 
 #point entre face 0 et 10 du cote 0
-tmppt1 = icoTriangCenters[0].reshape(3,1)
-tmppt2 = icoTriangCenters[10].reshape(3,1)
-tmppt = 0.5*(tmppt1+tmppt2)
-tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
-goldphi = (1.+sqrt(5.))/2.  # golden ratio (x^2=x+1)
-goldphi2 = goldphi * goldphi 
-c1 = goldphi/(1.+goldphi2)
-a1 = 2.*c1
-b1 = 0.
-mtx = mypix.rot((2.*pi/5.)/30, a1,b1,c1)
-tmppt = np.dot(mtx,tmppt)
+#tmppt1 = icoTriangCenters[0].reshape(3,1)
+#tmppt2 = icoTriangCenters[10].reshape(3,1)
+#tmppt = 0.5*(tmppt1+tmppt2)
+#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+#goldphi = (1.+sqrt(5.))/2.  # golden ratio (x^2=x+1)
+#goldphi2 = goldphi * goldphi 
+#c1 = goldphi/(1.+goldphi2)
+#a1 = 2.*c1
+#b1 = 0.
+#mtx = mypix.rot((2.*pi/5.)/30, a1,b1,c1)
+#tmppt = np.dot(mtx,tmppt)
 
 
-# In[565]:
+# In[728]:
+
+
+#point entre face 10 et 15
+#tmppt1 = icoTriangCenters[10].reshape(3,1)
+#tmppt2 = icoTriangCenters[15].reshape(3,1)
+#tmppt = 0.5*(tmppt1+tmppt2)
+#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+
+
+# In[729]:
+
+
+#point entre face 18 et 6
+#tmppt1 = icoTriangCenters[18].reshape(3,1)
+#tmppt2 = icoTriangCenters[6].reshape(3,1)
+#tmppt = 0.5*(tmppt1+tmppt2)
+#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+
+
+# In[742]:
+
+
+mypix.icoPoints[mypix.icoTriangs[0]]
+
+
+# In[746]:
+
+
+tmppt = mypix.icoVertices0[2].reshape(3,1)
+
+
+# In[747]:
+
+
+tmppt
+
+
+# In[752]:
+
+
+mypix.icoPoints[mypix.icoTriangs[11]]
+
+
+# In[732]:
 
 
 iFace, ijdx = mypix.pt2pix(tmppt)
 
 
-# In[566]:
+# In[733]:
+
+
+iFace, ijdx
+
+
+# In[734]:
 
 
 center = mypix.pix2pt(iFace, ijdx)
 
 
-# In[567]:
+# In[735]:
 
 
 vertices = mypix.pix2TileVertices(iFace, ijdx)
 
 
-# In[ ]:
+# In[738]:
 
 
+vertices
 
 
-
-# In[568]:
+# In[737]:
 
 
 zoom=False
@@ -1181,13 +1282,12 @@ else:
 plt.show()
 
 
-# In[526]:
+# In[681]:
 
 
-#mypix.plotFaceI(k=0)
+mypix.plotFaceI(k=0)
 #mypix.plotFaceI(k=4)
 #mypix.plotFaceI(k=1)
-mypix.plotFaceI(k=10)
 
 
 # # Avec Theta,Phi
@@ -1237,6 +1337,30 @@ mypix.angle2FaceId(angleicoTriangCenters)
 
 a=np.array([1]).squeeze()
 print(mypix.faceIto0Mtx[a].shape)
+
+
+# In[759]:
+
+
+atmp = np.zeros((3,2),dtype=np.int)
+
+
+# In[760]:
+
+
+atmp.shape
+
+
+# In[761]:
+
+
+atmp[0] = [1,2]
+
+
+# In[762]:
+
+
+atmp
 
 
 # In[ ]:
