@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[769]:
+# In[817]:
 
 
 class egoldpix:
@@ -278,7 +278,7 @@ class egoldpix:
             Set icosahedron face neighbors: bottom, left, right
             according to face orientation given by getIcoTriangs 
         """
-        nbarr = np.zeros((self.nIsofaces,),dtype=np.int)
+        nbarr = np.zeros((self.nIsofaces,3),dtype=np.int)
         #up cap
         nbarr[0] = [10,4,1]
         nbarr[1] = [11,0,2]
@@ -904,10 +904,10 @@ class egoldpix:
         """
             test pt -> pixel identifier 
             input : pt (x,y,z)
-            output: faceId, (i,j)-face0
+            output: faceId, (i,j)-face0 coding
         """
         # determine the face Id
-        iFace = self.pt2FaceId(pt)[0]  # Todo  vectorization
+        iFace = self.pt2FaceId(pt)[0]
         # rotate the point to face 0
         pt0 = np.dot(self.faceIto0Mtx[iFace],pt)
         #####Pas necessaire et peut produire une exception a cause d'arrondis
@@ -917,10 +917,8 @@ class egoldpix:
         a,b = self.getBarycentricCoordExtension(pt0.T,faceId=0)
         #centres of target tiles 
         centernbs,indexes = self.findNeightboorsHexagCenter(a,b)
-        print("pt2pix: centernbs: ", centernbs)
-        print("pt2pix: indexes: ", indexes)
         #find the closest one 
-        iloc = self.findClosest(pt0,centernbs)[0]  # Todo vectorization
+        iloc = self.findClosest(pt0,centernbs)[0]
         
         #the closest tile index
         idxClosest    = indexes[iloc]
@@ -931,16 +929,105 @@ class egoldpix:
         #        print("centerClosest: ",centerClosest)
         #        print("idxClosest: ",idxClosest)
         
-        return iFace, idxClosest
+        #return    
+        return self.codeTileIndex(iFace, idxClosest)
     
     #################################################################    
-    def pix2pt(self,iFace,ijdx):
+    def codeTileIndex(self, iFace, ijdx):
+        """
+            according to i,j-index choose to code
+            o [[face, i,j]] as default
+            o [[face1,i1,j1],[face2,i2,j2]] for tiles at edges between two icosahedron faces
+            o for pentagon NOT YET IMPLEMENTED
+        """
+        i0 = ijdx[0]
+        j0 = ijdx[1]
+
+        tileIdx = [[iFace, i0, j0]] #default
+        
+        if i0==0 and j0==0:
+            #top pentagon
+            print("top penta not yet implemented")
+
+        elif i0==self.n and j0==0:
+            #bottom left
+            print("bottom left penta not yet implemented")
+
+        elif i0==0 and j0==self.n:
+            #bottom right
+            print("bottom right penta not yet implemented")
+            
+        elif j0==0 and (i0 != 0 or i0 != self.n):
+            #tile edge between Face I and Left Face
+            # index correspondance (Face,i0,0) <-> (Left-Face,0,i0)
+            # like face 4 =Left-Face for face 0
+            i4 = 0
+            j4 = i0
+            iFaceLeft = self.faceNeighbors[iFace][1]
+            #order the two triplets according to the face Id
+            if  iFace < iFaceLeft:
+                tileIdx.append([iFaceLeft, i4, j4])
+            else:
+                tileIdx.insert(0,[iFaceLeft, i4, j4])
+
+        elif i0==0 and j0 != self.n:
+            #tile edge between Face I and Right Face
+            # index correspondance (Face,0,j0) <-> (Right-Face,j0,0)
+            # like face 1 =Right-Face for face 0
+            i1 = j0
+            j1 = 0
+            iFaceRight = self.faceNeighbors[iFace][2]
+            if iFace < iFaceRight:
+                tileIdx.append([iFaceRight, i1, j1])
+            else:
+                tileIdx.insert(0,[iFaceRight, i1, j1])
+
+        elif i0+j0==self.n:
+            #tile edge between Face I and Bottom Face 
+            # index correspondance (Face,i0,j0) avec i0+j0=n <-> (Bottom-Face,i0,0)
+            # like face 10 =Bottom-Face for face 0
+            i10 = i0
+            j10 = 0
+            iFaceBottom = self.faceNeighbors[iFace][0]
+            if iFace < iFaceBottom:
+                tileIdx.append([iFaceBottom, i10, j10])
+            else:
+                tileIdx.insert(0,[iFaceBottom, i10, j10])
+
+        return tileIdx
+
+    #################################################################    
+    def decodeTileIndex(self,tileIdx):
+        """
+            according to codeTileIndex convention, extract the first triplet
+            o ok for non-edge hexagonal tiles
+            o ok for edge hexagonal tiles
+            o for pentagon NOT YET IMPLEMENTED
+        """
+        # for non-edge hexagonal tiles & for edge hexagonal tiles take the first triplet
+        
+        return tileIdx[0]
+    #################################################################    
+    def pix2pt(self,tileIdx):
+        """
+            from tile index  retreive the tile center
+        """
+        iFace, i,j = self.decodeTileIndex(tileIdx)
+        #get location on the sphere as if it is a Face 0 tile   
+        center0 = self.getHexagoneCenterOnSphere(i,j)
+        # Rotate from Face0 to Face iFace
+        center = np.dot(self.face0toIMtx[iFace],center0)
+        return center
+
+    #################################################################    
+    def pix2pt_DEPRECATED(self,iFace,ijdx):
         """
           from face index and (i,j)-index on face 0 retreive the tile center
           input: 
               iFace: on of the 20 faces of the icosahedron
               ijdx: (i,j)-index of the tile on face 0 
         """
+        print("DEPRECATED NO MORE IN USE")
         #find center of the tile on Face 0 
         center0 = self.getHexagoneCenterOnSphere(ijdx[0],ijdx[1])
         #Rotate from Face0 to Face iFace
@@ -1097,24 +1184,24 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[764]:
+# In[818]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[722]:
+# In[819]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[723]:
+# In[820]:
 
 
 #test face 12 center 
-#tmppt = icoTriangCenters[12].reshape(3,1)
+tmppt = icoTriangCenters[12].reshape(3,1)
 
 
 # In[724]:
@@ -1165,14 +1252,14 @@ icoTriangCenters = mypix.icoTriangCenters
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[728]:
+# In[826]:
 
 
 #point entre face 10 et 15
-#tmppt1 = icoTriangCenters[10].reshape(3,1)
-#tmppt2 = icoTriangCenters[15].reshape(3,1)
-#tmppt = 0.5*(tmppt1+tmppt2)
-#tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+tmppt1 = icoTriangCenters[10].reshape(3,1)
+tmppt2 = icoTriangCenters[15].reshape(3,1)
+tmppt = 0.5*(tmppt1+tmppt2)
+tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 
 
 # In[729]:
@@ -1185,46 +1272,64 @@ icoTriangCenters = mypix.icoTriangCenters
 #tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 
 
-# In[742]:
+# In[780]:
 
 
-mypix.icoPoints[mypix.icoTriangs[0]]
+#mypix.icoPoints[mypix.icoTriangs[0]]
 
 
-# In[746]:
+# In[781]:
 
 
-tmppt = mypix.icoVertices0[2].reshape(3,1)
+#tmppt = mypix.icoVertices0[2].reshape(3,1)
 
 
-# In[747]:
+# In[782]:
+
+
+#tmppt
+
+
+# In[783]:
+
+
+#mypix.icoPoints[mypix.icoTriangs[11]]
+
+
+# In[827]:
 
 
 tmppt
 
 
-# In[752]:
+# In[828]:
 
 
-mypix.icoPoints[mypix.icoTriangs[11]]
+pixId = mypix.pt2pix(tmppt)
 
 
-# In[732]:
+# In[829]:
 
 
-iFace, ijdx = mypix.pt2pix(tmppt)
+pixId
 
 
-# In[733]:
+# In[832]:
 
 
-iFace, ijdx
+tmppixId=[pixId[1],pixId[0]]
 
 
-# In[734]:
+# In[833]:
 
 
-center = mypix.pix2pt(iFace, ijdx)
+center = mypix.pix2pt(pixId)
+
+
+# In[834]:
+
+
+center
 
 
 # In[735]:
@@ -1282,12 +1387,22 @@ else:
 plt.show()
 
 
-# In[681]:
+# In[802]:
 
 
-mypix.plotFaceI(k=0)
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20) 
+mypix.plotFaceI(k=10,ax=ax)
 #mypix.plotFaceI(k=4)
 #mypix.plotFaceI(k=1)
+mypix.plotFaceI(k=15,ax=ax)
+ax.set_xlim3d([-1,1])
+ax.set_ylim3d([-1,1])
+ax.set_zlim3d([-1,1])
+plt.show()
 
 
 # # Avec Theta,Phi
