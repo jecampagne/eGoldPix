@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[817]:
+# In[849]:
 
 
 class egoldpix:
@@ -1111,30 +1111,8 @@ class egoldpix:
         """
          There are 12 only pentagons so we can be more explicit 
          Orientation 'th' coherent with getHexInfo
-         Face-vertices relation from
-        icoTriangs[0] = np.array([0,1,2])
-        icoTriangs[1] = np.array([0,2,3])
-        icoTriangs[2] = np.array([0,3,4])
-        icoTriangs[3] = np.array([0,4,5])
-        icoTriangs[4] = np.array([0,5,1])
-        #JEC change 12/1/21 poour bottom cap evolue clockwise 
-        icoTriangs[5] = np.array([7,8,6])
-        icoTriangs[6] = np.array([11,7,6])
-        icoTriangs[7] = np.array([10,11,6])
-        icoTriangs[8] = np.array([9,10,6])
-        icoTriangs[9] = np.array([8,9,6])
-        #
-        icoTriangs[10]= np.array([2,1,9])
-        icoTriangs[11]= np.array([3,2,8])
-        icoTriangs[12]= np.array([4,3,7])
-        icoTriangs[13]= np.array([5,4,11])
-        icoTriangs[14]= np.array([1,5,10])
-        #
-        icoTriangs[15]= np.array([9,1,10])
-        icoTriangs[16]= np.array([8,2,9])
-        icoTriangs[17]= np.array([7,3,8])
-        icoTriangs[18]= np.array([11,4,7])
-        icoTriangs[19]= np.array([10,5,11])
+         Face-vertices relation from getIcoTriangs
+         the (i,j,th) triplet follow type 4 hexagons numbering/orientation 
         """
         
         pentaBuild=pd.DataFrame(columns=['idx','xyc','th'])
@@ -1386,7 +1364,7 @@ class egoldpix:
 
             
         #Penta #8:
-        idx0 = (5,6,16,11,17)
+        idx0 = (9,5,17,11,16)
         infos=[]
 
         infos.append({
@@ -1457,7 +1435,7 @@ class egoldpix:
         idx0 = (7,8,15,14,19)
         infos=[]
 
-                infos.append({
+        infos.append({
                 'idx':idx0,
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
@@ -1487,17 +1465,47 @@ class egoldpix:
         for info in infos:
             pentaBuild = pentaBuild.append(info,ignore_index=True)
         
-        ## OK   #####
+ 
+        #Penta #11
+        idx0 = (6,7,19,13,18)
 
+        infos.append({
+                'idx':idx0,
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
 
-        
-        #Penta #11  : bottom
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+       
+        #Penta #6  : bottom
         idx0 = (5,6,7,8,9)
         for k in idx0:
             info = {
                 'idx':idx0,
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th':0 #-2*pi/3
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
             }
             pentaBuild=pentaBuild.append(info,ignore_index=True)
 
@@ -1650,7 +1658,7 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[818]:
+# In[846]:
 
 
 mypix = egoldpix(n=6)
@@ -1942,6 +1950,61 @@ atmp[0] = [1,2]
 
 
 atmp
+
+
+# # Penta
+
+# In[837]:
+
+
+mypix.pentaDF
+
+
+# In[840]:
+
+
+mypix.pentaDF.iloc[0].vertices
+
+
+# In[848]:
+
+
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)  
+colors = cm.rainbow(np.linspace(0, 1, mypix.nIsofaces))
+
+
+for row in mypix.pentaDF.itertuples():
+        
+    atype  = row.type
+    vertsf = row.vertices
+    ax.add_collection3d(Poly3DCollection([vertsf], 
+                                             facecolors = 'deepskyblue', 
+                                             edgecolors='k', 
+                                             linewidths=1, alpha=0.5))
+
+    xyzc = row.center
+    ax.scatter(xyzc[0],xyzc[1],xyzc[2],marker='o',s=15,color='k')
+
+
+
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)
+ax.set_xlim3d([-1,1])
+ax.set_ylim3d([-1,1])
+ax.set_zlim3d([-1,1])
+    
+plt.show()
+
+
+# In[ ]:
+
+
+
 
 
 # In[ ]:
