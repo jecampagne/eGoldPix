@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[6]:
 
 
 import numpy as np
@@ -23,7 +23,7 @@ get_ipython().run_line_magic('matplotlib', '')
 get_ipython().run_line_magic('pinfo', 'Timer')
 
 
-# In[2]:
+# In[3]:
 
 
 # timer.py
@@ -95,7 +95,7 @@ class Timer(ContextDecorator):
 
 
 
-# In[3]:
+# In[4]:
 
 
 class isocapix:
@@ -1756,7 +1756,7 @@ tmp[10]=np.array([9,2,1])
 tmp
 
 
-# In[4]:
+# In[7]:
 
 
 mypix=isocapix(5,fact=0)
@@ -1768,10 +1768,11 @@ mypix=isocapix(5,fact=0)
 plotpix(mypix)
 
 
-# In[8]:
+# In[9]:
 
 
-mypix.icoTriangs
+for id,ico in enumerate(mypix.icoTriangs):
+    print(id,ico)
 
 
 # In[ ]:
