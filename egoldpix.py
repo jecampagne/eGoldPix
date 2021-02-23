@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[882]:
+# In[2]:
 
 
 class egoldpix:
@@ -1613,6 +1613,11 @@ class egoldpix:
         # compute pentagon barycenter and project onto the sphere
         pentaBuild['center']=pentaBuild['vertices']                    .map(lambda x: np.array(x).mean(axis=0))                    .map(lambda x: x/sqrt(sum(x*x)))
         
+        # Rebuild indexation (face, i,j)
+        pentaBuild['newIdx']=[[(a, *b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['idx'],pentaBuild['ij'])]
+        pentaBuild=pentaBuild.drop('idx',axis=1).drop('ij',axis=1).rename(columns={'newIdx':'idx'})
+        pentaBuild=pentaBuild[pentaBuild.columns[[2,0,1]]]
+        
         #To uniformize with the DF of the hexagons
         ###pentaBuild['type']=0
         #pentaBuild=pentaBuild[pentaBuild.columns[[0,1,2]]]
@@ -1711,7 +1716,7 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[883]:
+# In[3]:
 
 
 mypix = egoldpix(n=6)
@@ -2007,19 +2012,13 @@ atmp
 
 # # Penta
 
-# In[884]:
-
-
-mypix.pentaDF
-
-
-# In[840]:
+# In[4]:
 
 
 mypix.pentaDF.iloc[0].vertices
 
 
-# In[885]:
+# In[5]:
 
 
 fig = plt.figure()
