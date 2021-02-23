@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[849]:
+# In[882]:
 
 
 class egoldpix:
@@ -1113,11 +1113,16 @@ class egoldpix:
          Orientation 'th' coherent with getHexInfo
          Face-vertices relation from getIcoTriangs
          the (i,j,th) triplet follow type 4 hexagons numbering/orientation 
+         'ij' gives for each face the location (i,j) corresponding the position in getIcoTriangs
+              position 0 => (0,0)
+              position 1 => (n,0)
+              position 2 => (0,n)
         """
         
-        pentaBuild=pd.DataFrame(columns=['idx','xyc','th'])
+        pentaBuild=pd.DataFrame(columns=['idx','ij','xyc','th'])
         
-        #below idx0 is a tuple with the icosaedre face number (the order is important)
+        #below idx0 is a tuple with the icosaedre face number 
+        #  ===> the order in the tuple idx0 is important
         #we build a DF of the vertices of each pentagon positionned in local 2D icosadre-face frame
         
         xoff7 = self.xoff7
@@ -1129,6 +1134,7 @@ class egoldpix:
         for k in idx0:
             info = {
                 'idx':idx0,
+                'ij' : (0,0),
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th':0 #'th':-2*pi/3
             }
@@ -1144,29 +1150,34 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th':-self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th':self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                            
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1181,29 +1192,34 @@ class egoldpix:
         infos=[]
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th':-self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th':self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1218,29 +1234,34 @@ class egoldpix:
         infos=[]
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th':-self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th':self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1255,29 +1276,34 @@ class egoldpix:
         
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th':-self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th':self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1294,29 +1320,34 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th':-self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th':self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1336,26 +1367,31 @@ class egoldpix:
         
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1369,26 +1405,31 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1402,26 +1443,31 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1437,26 +1483,31 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1471,26 +1522,31 @@ class egoldpix:
 
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (n,0),                
                 'xyc':self.getHexagoneCenterOnFace(n-1,1),
                 'th': self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             })
         infos.append({
                 'idx':idx0,
+                'ij' : (0,0),                
                 'xyc':self.getHexagoneCenterOnFace(1,0),
                 'th': 0
             })
@@ -1504,6 +1560,7 @@ class egoldpix:
         for k in idx0:
             info = {
                 'idx':idx0,
+                'ij' : (0,n),                
                 'xyc':self.getHexagoneCenterOnFace(0,n-1),
                 'th': -self.twopi3
             }
@@ -1527,9 +1584,7 @@ class egoldpix:
                     a = self.icoTriangs[k,0]
                     b = self.icoTriangs[k,1]
                     c = self.icoTriangs[k,2]
-                    
-                    #print(k,a,b,c)
-                    
+                                        
                     xc,yc,th=info0[ik][0],info0[ik][1],info0[ik][2]
                     ##pt2d = np.array([sqrt(3)/2-self.fact,1/2+self.fact/sqrt(3)]) # type 3 
                     pt2d = np.array([-sqrt(3)/2+self.fact,1/2+self.fact/sqrt(3)]) # type 4 
@@ -1559,11 +1614,9 @@ class egoldpix:
         pentaBuild['center']=pentaBuild['vertices']                    .map(lambda x: np.array(x).mean(axis=0))                    .map(lambda x: x/sqrt(sum(x*x)))
         
         #To uniformize with the DF of the hexagons
-        pentaBuild['type']=0
-        pentaBuild=pentaBuild[pentaBuild.columns[[0,3,1,2]]]
-        
-        print(pentaBuild)
-        
+        ###pentaBuild['type']=0
+        #pentaBuild=pentaBuild[pentaBuild.columns[[0,1,2]]]
+                
         # Got it!
         return pentaBuild
 
@@ -1658,7 +1711,7 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[846]:
+# In[883]:
 
 
 mypix = egoldpix(n=6)
@@ -1954,7 +2007,7 @@ atmp
 
 # # Penta
 
-# In[837]:
+# In[884]:
 
 
 mypix.pentaDF
@@ -1966,7 +2019,7 @@ mypix.pentaDF
 mypix.pentaDF.iloc[0].vertices
 
 
-# In[848]:
+# In[885]:
 
 
 fig = plt.figure()
@@ -1979,7 +2032,6 @@ colors = cm.rainbow(np.linspace(0, 1, mypix.nIsofaces))
 
 for row in mypix.pentaDF.itertuples():
         
-    atype  = row.type
     vertsf = row.vertices
     ax.add_collection3d(Poly3DCollection([vertsf], 
                                              facecolors = 'deepskyblue', 
@@ -1999,12 +2051,6 @@ ax.set_ylim3d([-1,1])
 ax.set_zlim3d([-1,1])
     
 plt.show()
-
-
-# In[ ]:
-
-
-
 
 
 # In[ ]:
