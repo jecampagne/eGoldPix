@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[2]:
+# In[21]:
 
 
 class egoldpix:
@@ -1626,17 +1626,16 @@ class egoldpix:
         return pentaBuild
 
     #################################################################    
-    def pix2TileVertices(self,iFace,ijdx):
+    def pix2TileVertices(self,tileIdx):
         """
           from face index and (i,j)-index on face 0 retreive the tile vertices
           input: 
-              iFace: on of the 20 faces of the icosahedron
-              ijdx: (i,j)-index of the tile on face 0 
+              tileIdx : see codeTileIndex
+                  iFace: on of the 20 faces of the icosahedron
+                  (i0,j0)-index of the tile on face 0 
         """
         #Get the tile vertices on Face 0
-        i0 = ijdx[0]
-        j0 = ijdx[1]
-        print("i0,j0: ",i0,j0)
+        iFace, i0,j0 = self.decodeTileIndex(tileIdx)
         #get shape option and orientation of the tile
         opt, th = self.getHexInfos(i0,j0)
         #coordinates of the tile center on Face 0 frame
@@ -1716,20 +1715,20 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[3]:
+# In[22]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[819]:
+# In[23]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[820]:
+# In[24]:
 
 
 #test face 12 center 
@@ -1784,7 +1783,7 @@ tmppt = icoTriangCenters[12].reshape(3,1)
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[826]:
+# In[25]:
 
 
 #point entre face 10 et 15
@@ -1828,55 +1827,55 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 #mypix.icoPoints[mypix.icoTriangs[11]]
 
 
-# In[827]:
+# In[26]:
 
 
 tmppt
 
 
-# In[828]:
+# In[27]:
 
 
 pixId = mypix.pt2pix(tmppt)
 
 
-# In[829]:
+# In[28]:
 
 
 pixId
 
 
-# In[832]:
-
-
-tmppixId=[pixId[1],pixId[0]]
-
-
-# In[833]:
+# In[29]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[834]:
+# In[30]:
 
 
 center
 
 
-# In[735]:
+# In[31]:
 
 
-vertices = mypix.pix2TileVertices(iFace, ijdx)
+vertices = mypix.pix2TileVertices(pixId)
 
 
-# In[738]:
+# In[32]:
 
 
 vertices
 
 
-# In[737]:
+# In[34]:
+
+
+
+
+
+# In[37]:
 
 
 zoom=False
@@ -1898,10 +1897,9 @@ ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))],
                     edgecolors='k', 
                     linewidths=1, alpha=0.5))
 
-idxf = (iFace, ijdx[0],ijdx[1])
 ax.text(center[0]*1.01,
         center[1]*1.01,
-        center[2]*1.01,"{}".format('/'.join([str(x) for x in idxf])),
+        center[2]*1.01,"{}".format('/'.join([str(x) for x in mypix.decodeTileIndex(pixId)])),
         size=10, zorder=1, color='k')
 
 ax.set_xlabel(r'$X$', fontsize=20)
@@ -2050,6 +2048,124 @@ ax.set_ylim3d([-1,1])
 ax.set_zlim3d([-1,1])
     
 plt.show()
+
+
+# In[42]:
+
+
+# Les sommets de l'icosaedre sur la sphere
+icoPoints = mypix.getIcosaedreVertices()
+
+
+# In[57]:
+
+
+# sommet #2 + extra => remis sur la sphere
+tmppt = icoPoints[2] + [0.1, 0.1,0.1]
+tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
+tmppt = tmppt.reshape(3,1)
+
+
+# In[58]:
+
+
+tmppt
+
+
+# In[59]:
+
+
+pixId = mypix.pt2pix(tmppt)
+pixId
+
+
+# In[60]:
+
+
+center = mypix.pix2pt(pixId)
+
+
+# In[61]:
+
+
+center
+
+
+# In[62]:
+
+
+icoPoints[2]
+
+
+# In[64]:
+
+
+mypix.pentaDF['idx']
+
+
+# In[66]:
+
+
+idxtmp = mypix.pentaDF['idx'][1]
+
+
+# In[67]:
+
+
+idxtmp
+
+
+# In[84]:
+
+
+s=(11,-6,0)
+my_tuple_of_tuple = mypix.pentaDF['idx'][1]
+print(my_tuple_of_tuple)
+index = next((i for i,v in enumerate(my_tuple_of_tuple) if v == s),-1)
+print(index)
+
+
+# In[78]:
+
+
+for i,v in enumerate(my_tuple_of_tuple):
+    print(i,v,v==(11,6,0))
+
+
+# In[70]:
+
+
+(11,6,0) == (11,6,0)
+
+
+# In[81]:
+
+
+[i for i, tupl in enumerate(mypix.pentaDF['idx'][1]) if tupl == s]
+
+
+# In[115]:
+
+
+s=(11,-6,0)
+
+
+# In[116]:
+
+
+a = mypix.pentaDF.loc[mypix.pentaDF['idx'].map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]                    
+
+
+# In[119]:
+
+
+a.empty
+
+
+# In[117]:
+
+
+np.array(a.vertices.values[0])
 
 
 # In[ ]:
