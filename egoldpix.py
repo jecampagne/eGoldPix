@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[192]:
+# In[230]:
 
 
 class egoldpix:
@@ -952,11 +952,23 @@ class egoldpix:
         
         if i0==0 and j0==0:
             #top pentagon
-            print("top penta not yet implemented")
+            #print("top penta not yet implemented")
+            s = tileIdx[0]
+            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
+            if a.empty:
+                    print("codeTileIndex: top penta bug")
+            tileIdx = a.iloc[0]['idx']
+
 
         elif i0==self.n and j0==0:
             #bottom left
-            print("bottom left penta not yet implemented")
+            #print("bottom left penta not yet implemented")
+            s = tileIdx[0]
+            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
+            if a.empty:
+                    print("codeTileIndex: bottom left penta bug")
+            tileIdx = a.iloc[0]['idx']
+
 
         elif i0==0 and j0==self.n:
             #bottom right
@@ -1726,7 +1738,7 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[193]:
+# In[231]:
 
 
 mypix = egoldpix(n=6)
@@ -2067,48 +2079,48 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[196]:
+# In[232]:
 
 
 # Les sommets de l'icosaedre sur la sphere
 icoPoints = mypix.getIcosaedreVertices()
 
 
-# In[197]:
+# In[233]:
 
 
 # sommet #2 + extra => remis sur la sphere
-tmppt = icoPoints[2] + [0.1, 0.1,0.1]
+tmppt = icoPoints[2] + [0.01, -0.01,-0.01]
 tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 tmppt = tmppt.reshape(3,1)
 
 
-# In[198]:
+# In[234]:
 
 
 tmppt
 
 
-# In[199]:
+# In[235]:
 
 
 pixId = mypix.pt2pix(tmppt)
 pixId
 
 
-# In[200]:
+# In[236]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[201]:
+# In[237]:
 
 
 center
 
 
-# In[202]:
+# In[238]:
 
 
 icoPoints[2]
