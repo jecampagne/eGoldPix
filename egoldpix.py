@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[21]:
+# In[192]:
 
 
 class egoldpix:
@@ -960,8 +960,14 @@ class egoldpix:
 
         elif i0==0 and j0==self.n:
             #bottom right
-            print("bottom right penta not yet implemented")
+            # print("bottom right penta not yet implemented")
+            s = tileIdx[0]
+            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
+            if a.empty:
+                    print("codeTileIndex: bottom right penta bug")
+            tileIdx = a.iloc[0]['idx']
             
+                
         elif j0==0 and (i0 != 0 or i0 != self.n):
             #tile edge between Face I and Left Face
             # index correspondance (Face,i0,0) <-> (Left-Face,0,i0)
@@ -1130,13 +1136,15 @@ class egoldpix:
         n     = self.n
                         
         #Penta #0 : top
+        
+        # ------ nb idx0 should be a tuple for hastable
         idx0 = (0,1,2,3,4)
         for k in idx0:
             info = {
                 'idx':idx0,
                 'ij' : (0,0),
                 'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th':0 #'th':-2*pi/3
+                'th':0
             }
             pentaBuild=pentaBuild.append(info,ignore_index=True)
 
@@ -1616,6 +1624,9 @@ class egoldpix:
         # Rebuild indexation (face, i,j)
         pentaBuild['newIdx']=[[(a, *b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['idx'],pentaBuild['ij'])]
         pentaBuild=pentaBuild.drop('idx',axis=1).drop('ij',axis=1).rename(columns={'newIdx':'idx'})
+        #transform tuple into lis
+        pentaBuild['idx']= pentaBuild['idx'].map(lambda x:[list(l) for l in x])
+        pentaBuild['vertices'] = pentaBuild['vertices'].map(lambda x:[list(l) for l in x])
         pentaBuild=pentaBuild[pentaBuild.columns[[2,0,1]]]
         
         #To uniformize with the DF of the hexagons
@@ -1715,20 +1726,26 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[22]:
+# In[193]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[23]:
+# In[194]:
+
+
+mypix.pentaDF
+
+
+# In[174]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[24]:
+# In[175]:
 
 
 #test face 12 center 
@@ -1783,7 +1800,7 @@ tmppt = icoTriangCenters[12].reshape(3,1)
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[25]:
+# In[176]:
 
 
 #point entre face 10 et 15
@@ -1827,55 +1844,55 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 #mypix.icoPoints[mypix.icoTriangs[11]]
 
 
-# In[26]:
+# In[177]:
 
 
 tmppt
 
 
-# In[27]:
+# In[178]:
 
 
 pixId = mypix.pt2pix(tmppt)
 
 
-# In[28]:
+# In[179]:
 
 
 pixId
 
 
-# In[29]:
+# In[180]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[30]:
+# In[181]:
 
 
 center
 
 
-# In[31]:
+# In[182]:
 
 
 vertices = mypix.pix2TileVertices(pixId)
 
 
-# In[32]:
+# In[183]:
 
 
 vertices
 
 
-# In[34]:
+# In[ ]:
 
 
 
 
 
-# In[37]:
+# In[184]:
 
 
 zoom=False
@@ -1917,7 +1934,7 @@ else:
 plt.show()
 
 
-# In[802]:
+# In[185]:
 
 
 fig = plt.figure()
@@ -2010,13 +2027,13 @@ atmp
 
 # # Penta
 
-# In[4]:
+# In[186]:
 
 
 mypix.pentaDF.iloc[0].vertices
 
 
-# In[5]:
+# In[187]:
 
 
 fig = plt.figure()
@@ -2050,14 +2067,14 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[42]:
+# In[196]:
 
 
 # Les sommets de l'icosaedre sur la sphere
 icoPoints = mypix.getIcosaedreVertices()
 
 
-# In[57]:
+# In[197]:
 
 
 # sommet #2 + extra => remis sur la sphere
@@ -2066,106 +2083,35 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 tmppt = tmppt.reshape(3,1)
 
 
-# In[58]:
+# In[198]:
 
 
 tmppt
 
 
-# In[59]:
+# In[199]:
 
 
 pixId = mypix.pt2pix(tmppt)
 pixId
 
 
-# In[60]:
+# In[200]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[61]:
+# In[201]:
 
 
 center
 
 
-# In[62]:
+# In[202]:
 
 
 icoPoints[2]
-
-
-# In[64]:
-
-
-mypix.pentaDF['idx']
-
-
-# In[66]:
-
-
-idxtmp = mypix.pentaDF['idx'][1]
-
-
-# In[67]:
-
-
-idxtmp
-
-
-# In[84]:
-
-
-s=(11,-6,0)
-my_tuple_of_tuple = mypix.pentaDF['idx'][1]
-print(my_tuple_of_tuple)
-index = next((i for i,v in enumerate(my_tuple_of_tuple) if v == s),-1)
-print(index)
-
-
-# In[78]:
-
-
-for i,v in enumerate(my_tuple_of_tuple):
-    print(i,v,v==(11,6,0))
-
-
-# In[70]:
-
-
-(11,6,0) == (11,6,0)
-
-
-# In[81]:
-
-
-[i for i, tupl in enumerate(mypix.pentaDF['idx'][1]) if tupl == s]
-
-
-# In[115]:
-
-
-s=(11,-6,0)
-
-
-# In[116]:
-
-
-a = mypix.pentaDF.loc[mypix.pentaDF['idx'].map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]                    
-
-
-# In[119]:
-
-
-a.empty
-
-
-# In[117]:
-
-
-np.array(a.vertices.values[0])
 
 
 # In[ ]:
