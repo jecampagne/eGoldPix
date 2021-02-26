@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[230]:
+# In[239]:
 
 
 class egoldpix:
@@ -950,35 +950,12 @@ class egoldpix:
 
         tileIdx = [[iFace, i0, j0]] #default
         
-        if i0==0 and j0==0:
-            #top pentagon
-            #print("top penta not yet implemented")
-            s = tileIdx[0]
-            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
+        #pentagons fist: top, bottom left, bottom right
+        if (i0==0 and j0==0) or (i0==self.n and j0==0) or (i0==0 and j0==self.n):
+            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == tileIdx[0]),-1)) != -1]
             if a.empty:
-                    print("codeTileIndex: top penta bug")
+                    print("codeTileIndex: penta bug: iface,i,j",tileIdx[0])
             tileIdx = a.iloc[0]['idx']
-
-
-        elif i0==self.n and j0==0:
-            #bottom left
-            #print("bottom left penta not yet implemented")
-            s = tileIdx[0]
-            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
-            if a.empty:
-                    print("codeTileIndex: bottom left penta bug")
-            tileIdx = a.iloc[0]['idx']
-
-
-        elif i0==0 and j0==self.n:
-            #bottom right
-            # print("bottom right penta not yet implemented")
-            s = tileIdx[0]
-            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == s),-1)) != -1]
-            if a.empty:
-                    print("codeTileIndex: bottom right penta bug")
-            tileIdx = a.iloc[0]['idx']
-            
                 
         elif j0==0 and (i0 != 0 or i0 != self.n):
             #tile edge between Face I and Left Face
@@ -1738,13 +1715,13 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[231]:
+# In[240]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[194]:
+# In[241]:
 
 
 mypix.pentaDF
@@ -2079,14 +2056,14 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[232]:
+# In[242]:
 
 
 # Les sommets de l'icosaedre sur la sphere
 icoPoints = mypix.getIcosaedreVertices()
 
 
-# In[233]:
+# In[243]:
 
 
 # sommet #2 + extra => remis sur la sphere
@@ -2095,32 +2072,32 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 tmppt = tmppt.reshape(3,1)
 
 
-# In[234]:
+# In[244]:
 
 
 tmppt
 
 
-# In[235]:
+# In[245]:
 
 
 pixId = mypix.pt2pix(tmppt)
 pixId
 
 
-# In[236]:
+# In[246]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[237]:
+# In[247]:
 
 
 center
 
 
-# In[238]:
+# In[248]:
 
 
 icoPoints[2]
