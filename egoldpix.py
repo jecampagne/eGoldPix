@@ -19,7 +19,7 @@ from iteration_utilities import flatten
 get_ipython().run_line_magic('matplotlib', '')
 
 
-# In[239]:
+# In[391]:
 
 
 class egoldpix:
@@ -196,6 +196,535 @@ class egoldpix:
             ax.set_ylim3d([-1,1])
             ax.set_zlim3d([-1,1])
             plt.show()
+
+    #################################################################    
+    def makePentagon(self):
+        """
+         There are 12 only pentagons so we can be more explicit 
+         Orientation 'th' coherent with getHexInfo
+         Face-vertices relation from getIcoTriangs
+         the (i,j,th) triplet follow type 4 hexagons numbering/orientation 
+         'ij' gives for each face the location (i,j) corresponding the position in getIcoTriangs
+              position 0 => (0,0)
+              position 1 => (n,0)
+              position 2 => (0,n)
+              
+         return a Pandas DataFrame : 
+             "idx": list of [face,i,j] unique identifer of the pentagon
+             "vertices": list of 3D vertices on the sphere of the pentagon
+             "center" : 3D position of the center of the petagon on th sphere
+        """
+        
+        pentaBuild=pd.DataFrame(columns=['idx','ij','xyc','th'])
+        
+        #below idx0 is a tuple with the icosaedre face number 
+        #  ===> the order in the tuple idx0 is important
+        #we build a DF of the vertices of each pentagon positionned in local 2D icosadre-face frame
+        
+        xoff7 = self.xoff7
+        yoff7 = self.yoff7
+        n     = self.n
+                        
+        #Penta #0 : top
+        
+        # ------ nb idx0 should be a tuple for hastable
+        idx0 = (0,1,2,3,4)
+        for k in idx0:
+            info = {
+                'idx':idx0,
+                'ij' : (0,0),
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th':0
+            }
+            pentaBuild=pentaBuild.append(info,ignore_index=True)
+
+        
+        ######
+        #Pentas of the upper ring
+        ######
+        #Penta #1 : 
+        idx0 = (4,0,10,15,14)
+        infos=[]
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th':-self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th':self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                            
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+
+        #Penta #2 :
+        idx0 = (0,1,11,16,10)
+        infos=[]
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th':-self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th':self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        for info in infos:
+            pentaBuild=pentaBuild.append(info,ignore_index=True)
+        
+            
+            
+        #Penta #3
+        idx0 = (1,2,12,17,11)
+        infos=[]
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th':-self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th':self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+                    
+            
+        #Penta #4 :
+        idx0 = (2,3,13,18,12)
+        infos=[]
+        
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th':-self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th':self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+
+        
+        #Penta #5 :
+        idx0 = (3,4,14,19,13)
+        infos=[]
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th':-self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th':self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+            
+
+        ######
+        #Pentas of the lower ring
+        ######
+
+        #Penta #7 :
+        idx0 = (5,6,18,12,17)
+        infos=[]
+        
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+            
+        #Penta #8:
+        idx0 = (9,5,17,11,16)
+        infos=[]
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+
+        #Penta #9
+        idx0 = (8,9,16,10,15)
+        infos=[]
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+            
+
+        
+        #Penta #10
+        idx0 = (7,8,15,14,19)
+        infos=[]
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+        
+ 
+        #Penta #11
+        idx0 = (6,7,19,13,18)
+
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (n,0),                
+                'xyc':self.getHexagoneCenterOnFace(n-1,1),
+                'th': self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            })
+        infos.append({
+                'idx':idx0,
+                'ij' : (0,0),                
+                'xyc':self.getHexagoneCenterOnFace(1,0),
+                'th': 0
+            })
+
+        for info in infos:
+            pentaBuild = pentaBuild.append(info,ignore_index=True)
+
+       
+        #Penta #6  : bottom
+        idx0 = (5,6,7,8,9)
+        for k in idx0:
+            info = {
+                'idx':idx0,
+                'ij' : (0,n),                
+                'xyc':self.getHexagoneCenterOnFace(0,n-1),
+                'th': -self.twopi3
+            }
+            pentaBuild=pentaBuild.append(info,ignore_index=True)
+
+                            
+        #We group by idx and then get (x,y,th) triplet list
+        pentaBuild=pentaBuild.groupby('idx',as_index=False).agg(lambda x: x.tolist())
+        pentaBuild['info']=[[(*a, b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['xyc'],pentaBuild['th'])]
+    
+        pentaBuild=pentaBuild.drop(['xyc','th'],axis=1)
+
+                
+        #get the 3D coordinates of the pentagon vertices
+        for row in pentaBuild.itertuples():
+            def make_pts3d(row):
+                idx0 = row.idx
+                info0 = np.array(row.info) 
+                pts3d = []
+                for ik,k in enumerate(idx0):
+                    a = self.icoTriangs[k,0]
+                    b = self.icoTriangs[k,1]
+                    c = self.icoTriangs[k,2]
+                                        
+                    xc,yc,th=info0[ik][0],info0[ik][1],info0[ik][2]
+                    ##pt2d = np.array([sqrt(3)/2-self.fact,1/2+self.fact/sqrt(3)]) # type 3 
+                    pt2d = np.array([-sqrt(3)/2+self.fact,1/2+self.fact/sqrt(3)]) # type 4 
+                    rot_mat = self.scale * np.array([[np.cos(th), -np.sin(th)],
+                                                [np.sin(th), np.cos(th)]])
+                    
+
+                    pt2d = np.matmul(rot_mat,pt2d)
+                    pt2d[0] += xc
+                    pt2d[1] += yc
+
+
+                    #pt3d = self.rounding(self.getProjectedPt(pt2d,a,b,c))
+                    pt3d = self.getProjectedPt(pt2d,a,b,c)
+                    
+                    
+                    pts3d.append(pt3d)
+
+                pts3d = np.array(list(pts3d))#*self.tol
+                vertsf=list(zip(pts3d[:,0],pts3d[:,1],pts3d[:,2]))
+                return vertsf
+        #
+        pentaBuild['vertices']=pentaBuild.apply(make_pts3d, axis=1)
+        #drop the intermediate "info"
+        pentaBuild=pentaBuild.drop('info',axis=1)
+        # compute pentagon barycenter and project onto the sphere
+        pentaBuild['center']=pentaBuild['vertices']                    .map(lambda x: np.array(x).mean(axis=0))                    .map(lambda x: x/sqrt(sum(x*x)))
+        
+        # Rebuild indexation (face, i,j)
+        pentaBuild['newIdx']=[[(a, *b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['idx'],pentaBuild['ij'])]
+        pentaBuild=pentaBuild.drop('idx',axis=1).drop('ij',axis=1).rename(columns={'newIdx':'idx'})
+        #transform tuple into lis
+        pentaBuild['idx']= pentaBuild['idx'].map(lambda x:[list(l) for l in x])
+        pentaBuild['vertices'] = pentaBuild['vertices'].map(lambda x:[list(l) for l in x])
+        pentaBuild=pentaBuild[pentaBuild.columns[[2,0,1]]]
+        
+        #To uniformize with the DF of the hexagons
+        ###pentaBuild['type']=0
+        #pentaBuild=pentaBuild[pentaBuild.columns[[0,1,2]]]
+                
+        # Got it!
+        return pentaBuild
 
     #################################################################
     def getIcosaedreVertices(self):
@@ -817,12 +1346,7 @@ class egoldpix:
 
         
         
-        u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]
-        
-        print("getBarycentri pt shape: ",pt.shape)
-        print("getBarycentri  u shape: ",u.shape)
-        
-        
+        u = vertices[1][np.newaxis,:]-vertices[0][np.newaxis,:]        
         v = vertices[2][np.newaxis,:]-vertices[0][np.newaxis,:]
         w = pt - vertices[0][np.newaxis,:]
         # S=[u,v,OPshere]
@@ -861,7 +1385,7 @@ class egoldpix:
         i = int(round(bscaled))
         j = int(round(cscaled))
         
-        print("findNeightboorsHexagCenter; i,j target: ",i,j)
+#        print("findNeightboorsHexagCenter; i,j target: ",i,j)
 
         #Choose indexes of the hexagones to test for closest approach
         if full:
@@ -879,7 +1403,7 @@ class egoldpix:
                     indexes = [(i,j),(i,j-1),(i-1,j)]
 
         centers = []
-        print("findNeightboorsHexagCenter; indexes: ",indexes)
+#        print("findNeightboorsHexagCenter; indexes: ",indexes)
         for (ic,jc) in indexes:
             if ic+jc > self.n: continue
             
@@ -1002,7 +1526,7 @@ class egoldpix:
             according to codeTileIndex convention, extract the first triplet
             o ok for non-edge hexagonal tiles
             o ok for edge hexagonal tiles
-            o for pentagon NOT YET IMPLEMENTED
+            o ok for pendagon
         """
         # for non-edge hexagonal tiles & for edge hexagonal tiles take the first triplet
         
@@ -1101,529 +1625,6 @@ class egoldpix:
             DEPRECATED: use getHexagoneCenterOnFace(self,i,j)
         '''
         return xoff7+i/n+j/(2*n), yoff7+j*sqrt(3)/(2*n)
-    #################################################################    
-    def makePentagon(self):
-        """
-         There are 12 only pentagons so we can be more explicit 
-         Orientation 'th' coherent with getHexInfo
-         Face-vertices relation from getIcoTriangs
-         the (i,j,th) triplet follow type 4 hexagons numbering/orientation 
-         'ij' gives for each face the location (i,j) corresponding the position in getIcoTriangs
-              position 0 => (0,0)
-              position 1 => (n,0)
-              position 2 => (0,n)
-        """
-        
-        pentaBuild=pd.DataFrame(columns=['idx','ij','xyc','th'])
-        
-        #below idx0 is a tuple with the icosaedre face number 
-        #  ===> the order in the tuple idx0 is important
-        #we build a DF of the vertices of each pentagon positionned in local 2D icosadre-face frame
-        
-        xoff7 = self.xoff7
-        yoff7 = self.yoff7
-        n     = self.n
-                        
-        #Penta #0 : top
-        
-        # ------ nb idx0 should be a tuple for hastable
-        idx0 = (0,1,2,3,4)
-        for k in idx0:
-            info = {
-                'idx':idx0,
-                'ij' : (0,0),
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th':0
-            }
-            pentaBuild=pentaBuild.append(info,ignore_index=True)
-
-        
-        ######
-        #Pentas of the upper ring
-        ######
-        #Penta #1 : 
-        idx0 = (4,0,10,15,14)
-        infos=[]
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th':-self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th':self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                            
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-
-
-        #Penta #2 :
-        idx0 = (0,1,11,16,10)
-        infos=[]
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th':-self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th':self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        for info in infos:
-            pentaBuild=pentaBuild.append(info,ignore_index=True)
-        
-            
-            
-        #Penta #3
-        idx0 = (1,2,12,17,11)
-        infos=[]
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th':-self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th':self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-                    
-            
-        #Penta #4 :
-        idx0 = (2,3,13,18,12)
-        infos=[]
-        
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th':-self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th':self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-
-
-        
-        #Penta #5 :
-        idx0 = (3,4,14,19,13)
-        infos=[]
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th':-self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th':self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-            
-
-        ######
-        #Pentas of the lower ring
-        ######
-
-        #Penta #7 :
-        idx0 = (5,6,18,12,17)
-        infos=[]
-        
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-
-            
-        #Penta #8:
-        idx0 = (9,5,17,11,16)
-        infos=[]
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-
-
-        #Penta #9
-        idx0 = (8,9,16,10,15)
-        infos=[]
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-            
-
-        
-        #Penta #10
-        idx0 = (7,8,15,14,19)
-        infos=[]
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-        
- 
-        #Penta #11
-        idx0 = (6,7,19,13,18)
-
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (n,0),                
-                'xyc':self.getHexagoneCenterOnFace(n-1,1),
-                'th': self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            })
-        infos.append({
-                'idx':idx0,
-                'ij' : (0,0),                
-                'xyc':self.getHexagoneCenterOnFace(1,0),
-                'th': 0
-            })
-
-        for info in infos:
-            pentaBuild = pentaBuild.append(info,ignore_index=True)
-
-       
-        #Penta #6  : bottom
-        idx0 = (5,6,7,8,9)
-        for k in idx0:
-            info = {
-                'idx':idx0,
-                'ij' : (0,n),                
-                'xyc':self.getHexagoneCenterOnFace(0,n-1),
-                'th': -self.twopi3
-            }
-            pentaBuild=pentaBuild.append(info,ignore_index=True)
-
-                            
-        #We group by idx and then get (x,y,th) triplet list
-        pentaBuild=pentaBuild.groupby('idx',as_index=False).agg(lambda x: x.tolist())
-        pentaBuild['info']=[[(*a, b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['xyc'],pentaBuild['th'])]
-    
-        pentaBuild=pentaBuild.drop(['xyc','th'],axis=1)
-
-                
-        #get the 3D coordinates of the pentagon vertices
-        for row in pentaBuild.itertuples():
-            def make_pts3d(row):
-                idx0 = row.idx
-                info0 = np.array(row.info) 
-                pts3d = []
-                for ik,k in enumerate(idx0):
-                    a = self.icoTriangs[k,0]
-                    b = self.icoTriangs[k,1]
-                    c = self.icoTriangs[k,2]
-                                        
-                    xc,yc,th=info0[ik][0],info0[ik][1],info0[ik][2]
-                    ##pt2d = np.array([sqrt(3)/2-self.fact,1/2+self.fact/sqrt(3)]) # type 3 
-                    pt2d = np.array([-sqrt(3)/2+self.fact,1/2+self.fact/sqrt(3)]) # type 4 
-                    rot_mat = self.scale * np.array([[np.cos(th), -np.sin(th)],
-                                                [np.sin(th), np.cos(th)]])
-                    
-
-                    pt2d = np.matmul(rot_mat,pt2d)
-                    pt2d[0] += xc
-                    pt2d[1] += yc
-
-
-                    #pt3d = self.rounding(self.getProjectedPt(pt2d,a,b,c))
-                    pt3d = self.getProjectedPt(pt2d,a,b,c)
-                    
-                    
-                    pts3d.append(pt3d)
-
-                pts3d = np.array(list(pts3d))#*self.tol
-                vertsf=list(zip(pts3d[:,0],pts3d[:,1],pts3d[:,2]))
-                return vertsf
-        #
-        pentaBuild['vertices']=pentaBuild.apply(make_pts3d, axis=1)
-        #drop the intermediate "info"
-        pentaBuild=pentaBuild.drop('info',axis=1)
-        # compute pentagon barycenter and project onto the sphere
-        pentaBuild['center']=pentaBuild['vertices']                    .map(lambda x: np.array(x).mean(axis=0))                    .map(lambda x: x/sqrt(sum(x*x)))
-        
-        # Rebuild indexation (face, i,j)
-        pentaBuild['newIdx']=[[(a, *b) for a, b in zip(x, y)] for x, y in zip(pentaBuild['idx'],pentaBuild['ij'])]
-        pentaBuild=pentaBuild.drop('idx',axis=1).drop('ij',axis=1).rename(columns={'newIdx':'idx'})
-        #transform tuple into lis
-        pentaBuild['idx']= pentaBuild['idx'].map(lambda x:[list(l) for l in x])
-        pentaBuild['vertices'] = pentaBuild['vertices'].map(lambda x:[list(l) for l in x])
-        pentaBuild=pentaBuild[pentaBuild.columns[[2,0,1]]]
-        
-        #To uniformize with the DF of the hexagons
-        ###pentaBuild['type']=0
-        #pentaBuild=pentaBuild[pentaBuild.columns[[0,1,2]]]
-                
-        # Got it!
-        return pentaBuild
 
     #################################################################    
     def pix2TileVertices(self,tileIdx):
@@ -1636,6 +1637,16 @@ class egoldpix:
         """
         #Get the tile vertices on Face 0
         iFace, i0,j0 = self.decodeTileIndex(tileIdx)
+                
+        #pentagons fist: top, bottom left, bottom right
+        if (i0==0 and j0==0) or (i0==self.n and j0==0) or (i0==0 and j0==self.n):
+            a = self.pentaDF.loc[self.pentaDF['idx']                .map(lambda x: next((i for i,v in enumerate(x) if v == tileIdx[0]),-1)) != -1]
+            if a.empty:
+                    print("codeTileIndex: penta bug: iface,i,j",tileIdx[0])
+            return np.array(a.iloc[0]['vertices']).T
+
+        
+
         #get shape option and orientation of the tile
         opt, th = self.getHexInfos(i0,j0)
         #coordinates of the tile center on Face 0 frame
@@ -1645,21 +1656,9 @@ class egoldpix:
         verticesOnSphere0= self.getProjectedFace(verticesOnFace,
                                             self.icoTriangs0[0],
                                             self.icoTriangs0[1],
-                                            self.icoTriangs0[2])
-        
-        if i0==0 and j0==0:
-            #top pentagon
-            print("top penta not yet implemented")
-
-        elif i0==self.n and j0==0:
-            #bottom left
-            print("bottom left penta not yet implemented")
-
-        elif i0==0 and j0==self.n:
-            #bottom right
-            print("bottom right penta not yet implemented")
+                                            self.icoTriangs0[2])    
             
-        elif j0==0 and (i0 != 0 or i0 != self.n):
+        if j0==0 and (i0 != 0 or i0 != self.n):
             #tile edge between Face 0 and Face 4
             # index correspondance (0,i0,0) <-> (4,0,i0)
             i4 = 0
@@ -1715,40 +1714,40 @@ class egoldpix:
         return verticesOnSphere
 
 
-# In[240]:
+# In[392]:
 
 
 mypix = egoldpix(n=6)
 
 
-# In[241]:
+# In[393]:
 
 
 mypix.pentaDF
 
 
-# In[174]:
+# In[375]:
 
 
 # theta, phi angles of the 20 center of faces
 icoTriangCenters = mypix.icoTriangCenters
 
 
-# In[175]:
+# In[376]:
 
 
 #test face 12 center 
 tmppt = icoTriangCenters[12].reshape(3,1)
 
 
-# In[724]:
+# In[377]:
 
 
 #test face 6 center 
 #tmppt = icoTriangCenters[6].reshape(3,1)
 
 
-# In[725]:
+# In[378]:
 
 
 #point entre face 0 et 4 du cote 0
@@ -1760,7 +1759,7 @@ tmppt = icoTriangCenters[12].reshape(3,1)
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[726]:
+# In[379]:
 
 
 #point entre face 0 et 1 du cote 0
@@ -1772,7 +1771,7 @@ tmppt = icoTriangCenters[12].reshape(3,1)
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[727]:
+# In[380]:
 
 
 #point entre face 0 et 10 du cote 0
@@ -1789,7 +1788,7 @@ tmppt = icoTriangCenters[12].reshape(3,1)
 #tmppt = np.dot(mtx,tmppt)
 
 
-# In[176]:
+# In[394]:
 
 
 #point entre face 10 et 15
@@ -1799,7 +1798,7 @@ tmppt = 0.5*(tmppt1+tmppt2)
 tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 
 
-# In[729]:
+# In[395]:
 
 
 #point entre face 18 et 6
@@ -1809,67 +1808,67 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 #tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 
 
-# In[780]:
+# In[396]:
 
 
 #mypix.icoPoints[mypix.icoTriangs[0]]
 
 
-# In[781]:
+# In[397]:
 
 
 #tmppt = mypix.icoVertices0[2].reshape(3,1)
 
 
-# In[782]:
+# In[398]:
 
 
 #tmppt
 
 
-# In[783]:
+# In[399]:
 
 
 #mypix.icoPoints[mypix.icoTriangs[11]]
 
 
-# In[177]:
+# In[400]:
 
 
 tmppt
 
 
-# In[178]:
+# In[401]:
 
 
 pixId = mypix.pt2pix(tmppt)
 
 
-# In[179]:
+# In[402]:
 
 
 pixId
 
 
-# In[180]:
+# In[403]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[181]:
+# In[404]:
 
 
 center
 
 
-# In[182]:
+# In[405]:
 
 
 vertices = mypix.pix2TileVertices(pixId)
 
 
-# In[183]:
+# In[406]:
 
 
 vertices
@@ -1881,7 +1880,7 @@ vertices
 
 
 
-# In[184]:
+# In[407]:
 
 
 zoom=False
@@ -2016,13 +2015,13 @@ atmp
 
 # # Penta
 
-# In[186]:
+# In[340]:
 
 
 mypix.pentaDF.iloc[0].vertices
 
 
-# In[187]:
+# In[341]:
 
 
 fig = plt.figure()
@@ -2056,14 +2055,14 @@ ax.set_zlim3d([-1,1])
 plt.show()
 
 
-# In[242]:
+# In[357]:
 
 
 # Les sommets de l'icosaedre sur la sphere
 icoPoints = mypix.getIcosaedreVertices()
 
 
-# In[243]:
+# In[370]:
 
 
 # sommet #2 + extra => remis sur la sphere
@@ -2072,35 +2071,95 @@ tmppt = tmppt/np.sqrt(np.sum(tmppt*tmppt))
 tmppt = tmppt.reshape(3,1)
 
 
-# In[244]:
+# In[371]:
 
 
 tmppt
 
 
-# In[245]:
+# In[372]:
 
 
 pixId = mypix.pt2pix(tmppt)
 pixId
 
 
-# In[246]:
+# In[361]:
 
 
 center = mypix.pix2pt(pixId)
 
 
-# In[247]:
+# In[362]:
 
 
 center
 
 
-# In[248]:
+# In[363]:
 
 
 icoPoints[2]
+
+
+# In[364]:
+
+
+vertices = mypix.pix2TileVertices(pixId)
+
+
+# In[365]:
+
+
+vertices
+
+
+# In[366]:
+
+
+vertices[0,:]
+
+
+# In[367]:
+
+
+zoom=False
+fig = plt.figure()
+ax = Axes3D(fig)
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)  
+
+colors = cm.rainbow(np.linspace(0, 1, mypix.nIsofaces))
+
+ax.scatter(tmppt[0],tmppt[1],tmppt[2],marker='o',s=10,color='blue')
+
+
+ax.scatter(center[0],center[1],center[2],marker='x',s=10,color='k')
+xf,yf,zf = vertices[0,:],vertices[1,:],vertices[2,:]
+ax.add_collection3d(Poly3DCollection([list(zip(xf,yf,zf))], 
+                    facecolors = colors[iFace], 
+                    edgecolors='k', 
+                    linewidths=1, alpha=0.5))
+
+ax.text(center[0]*1.01,
+        center[1]*1.01,
+        center[2]*1.01,"{}".format('/'.join([str(x) for x in mypix.decodeTileIndex(pixId)])),
+        size=10, zorder=1, color='k')
+
+ax.set_xlabel(r'$X$', fontsize=20)
+ax.set_ylabel(r'$Y$', fontsize=20)
+ax.set_zlabel(r'$Z$', fontsize=20)
+if zoom:
+    ax.set_xlim3d([np.min(vertices[0,:]),np.max(vertices[0,:])])
+    ax.set_ylim3d([np.min(vertices[1,:]),np.max(vertices[1,:])])
+    ax.set_zlim3d([np.min(vertices[2,:]),np.max(vertices[2,:])])
+else:
+    ax.set_xlim3d([-1,1])
+    ax.set_ylim3d([-1,1])
+    ax.set_zlim3d([-1,1])
+    
+plt.show()
 
 
 # In[ ]:
